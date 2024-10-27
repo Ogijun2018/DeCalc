@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		FB0246C52CCE0A2C00BBFCF9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB0246782CCDD6DE00BBFCF9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FB02467F2CCDD6DE00BBFCF9;
+			remoteInfo = DeCalc;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		FB0246802CCDD6DE00BBFCF9 /* DeCalc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DeCalc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB0246C12CCE0A2C00BBFCF9 /* DeCalcUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeCalcUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,10 +40,22 @@
 			path = DeCalc;
 			sourceTree = "<group>";
 		};
+		FB0246C22CCE0A2C00BBFCF9 /* DeCalcUnitTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DeCalcUnitTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		FB02467D2CCDD6DE00BBFCF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB0246BE2CCE0A2C00BBFCF9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				FB0246822CCDD6DE00BBFCF9 /* DeCalc */,
+				FB0246C22CCE0A2C00BBFCF9 /* DeCalcUnitTests */,
 				FB0246812CCDD6DE00BBFCF9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				FB0246802CCDD6DE00BBFCF9 /* DeCalc.app */,
+				FB0246C12CCE0A2C00BBFCF9 /* DeCalcUnitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -83,6 +108,29 @@
 			productReference = FB0246802CCDD6DE00BBFCF9 /* DeCalc.app */;
 			productType = "com.apple.product-type.application";
 		};
+		FB0246C02CCE0A2C00BBFCF9 /* DeCalcUnitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB0246C72CCE0A2C00BBFCF9 /* Build configuration list for PBXNativeTarget "DeCalcUnitTests" */;
+			buildPhases = (
+				FB0246BD2CCE0A2C00BBFCF9 /* Sources */,
+				FB0246BE2CCE0A2C00BBFCF9 /* Frameworks */,
+				FB0246BF2CCE0A2C00BBFCF9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FB0246C62CCE0A2C00BBFCF9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FB0246C22CCE0A2C00BBFCF9 /* DeCalcUnitTests */,
+			);
+			name = DeCalcUnitTests;
+			packageProductDependencies = (
+			);
+			productName = DeCalcUnitTests;
+			productReference = FB0246C12CCE0A2C00BBFCF9 /* DeCalcUnitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -95,6 +143,10 @@
 				TargetAttributes = {
 					FB02467F2CCDD6DE00BBFCF9 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					FB0246C02CCE0A2C00BBFCF9 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = FB02467F2CCDD6DE00BBFCF9;
 					};
 				};
 			};
@@ -113,12 +165,20 @@
 			projectRoot = "";
 			targets = (
 				FB02467F2CCDD6DE00BBFCF9 /* DeCalc */,
+				FB0246C02CCE0A2C00BBFCF9 /* DeCalcUnitTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FB02467E2CCDD6DE00BBFCF9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB0246BF2CCE0A2C00BBFCF9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +195,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB0246BD2CCE0A2C00BBFCF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FB0246C62CCE0A2C00BBFCF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FB02467F2CCDD6DE00BBFCF9 /* DeCalc */;
+			targetProxy = FB0246C52CCE0A2C00BBFCF9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		FB0246922CCDD6E000BBFCF9 /* Debug */ = {
@@ -319,6 +394,42 @@
 			};
 			name = Release;
 		};
+		FB0246C82CCE0A2C00BBFCF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VZBG2DMPDR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ogijun.DeCalcUnitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DeCalc.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DeCalc";
+			};
+			name = Debug;
+		};
+		FB0246C92CCE0A2C00BBFCF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VZBG2DMPDR;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ogijun.DeCalcUnitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DeCalc.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DeCalc";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -336,6 +447,15 @@
 			buildConfigurations = (
 				FB0246922CCDD6E000BBFCF9 /* Debug */,
 				FB0246932CCDD6E000BBFCF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB0246C72CCE0A2C00BBFCF9 /* Build configuration list for PBXNativeTarget "DeCalcUnitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB0246C82CCE0A2C00BBFCF9 /* Debug */,
+				FB0246C92CCE0A2C00BBFCF9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
