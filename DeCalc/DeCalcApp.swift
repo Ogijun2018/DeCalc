@@ -25,7 +25,7 @@ struct DeCalcApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView(viewModel: .init())
         }
         .modelContainer(sharedModelContainer)
     }

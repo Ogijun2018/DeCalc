@@ -7,6 +7,11 @@
 
 import Foundation
 
+enum Gender {
+    case Men
+    case Women
+}
+
 /// 混成競技の共通ロジック
 /// 混成競技の得点計算方法
 /// ref: https://games.athleteranking.com/faq/faq07.php
@@ -62,11 +67,6 @@ struct CombinedModel {
             case javelinThrow(Gender)
             /// 円盤投
             case discusThrow
-        }
-
-        enum Gender {
-            case Men
-            case Women
         }
 
         var firstCoefficient: Double {
