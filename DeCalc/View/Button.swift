@@ -8,31 +8,69 @@
 import SwiftUI
 
 struct ClaymorphismButton: View {
-    let buttonColor = Color.init(red: 0.38, green: 0.28, blue: 0.86)
-    let lightColor = Color.init(red: 0.54, green: 0.41, blue: 0.95)
-    let shadowColor = Color.init(red: 0.25, green: 0.17, blue: 0.75)
-    let radius = CGFloat(15)
+    private enum Const {
+        static let imageSize: CGFloat = 75
+        static let cornerRadius: CGFloat = 10.0
+    }
 
     let title: String
+    let subTitle: String
+    let imagePath: String
 
     var body: some View {
-        Text(title)
-            .font(.system(size: 20, weight: .semibold, design: .default))
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 30)
-            .background(
-                RoundedRectangle(cornerRadius: radius)
-                    .fill(
-                        // shadowでボタン上部に光沢を持たせる
-                        // .innerはiOS16から対応
-                        .shadow(.inner(color: lightColor, radius: 6, x: 4, y: 4))
-                        // shadowでボタン下部に影を落とす
-                        .shadow(.inner(color: shadowColor, radius: 6, x: -2, y: -2))
+        HStack {
+            Image(imagePath)
+                .resizable()
+                .scaledToFit()
+                .frame(width: Const.imageSize, height: Const.imageSize)
+                .padding(2)
+                .shadow(radius: 5, x: 3, y: 3)
+                .background(
+                    RoundedRectangle(cornerRadius: Const.cornerRadius + 5)
+                        .foregroundColor(.white)
+                )
+            VStack(alignment: .center, spacing: 5) {
+                Text(title)
+                    .font(.system(size: 40, weight: .heavy, design: .default))
+                    // 指定した倍率まで縮小され、それより小さい場合は`…`に省略
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.1)
+                    .foregroundColor(.white)
+                    .italic()
+                Text(subTitle)
+                    .padding(.horizontal, 50)
+                    .padding(.vertical, 5)
+                    .font(.system(size: 20, weight: .bold, design: .default))
+                    .foregroundColor(.white)
+                    .background(
+                        Capsule()
+                            .fill(Color.black)
+                            .stroke(Color.gray, lineWidth: 4)
+                            .shadow(radius: 2)
                     )
-                    .foregroundColor(buttonColor)
-                    // ボタンのshadowはボタンの色に合わせる
-//                        .shadow(color: buttonColor, radius: 20, y: 10)
-            )
+            }
+        }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 20)
+        .background(
+            RoundedRectangle(cornerRadius: Const.cornerRadius)
+                .fill(
+                    LinearGradient(
+                        colors: [.gray, .black, .black],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(radius: 5)
+        )
     }
 }
+
+#Preview {
+    ClaymorphismButton(
+        title: "Decathlon",
+        subTitle: "十種競技",
+        imagePath: "ten_hero_image"
+    )
+}
+
