@@ -8,39 +8,35 @@
 import SwiftUI
 import SwiftData
 
-struct Cell: Identifiable {
-    var id = UUID()
-    var name: String
-    var jpName: String
-    var gender: Gender
-    var imagePath: String
-}
-
 struct HomeView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+//    @Environment(\.modelContext) private var modelContext
     @StateObject var viewModel: HomeViewModel
 
     // Animationの発火はtoggle()することでしか実現できない？
     @State private var menIconBounce: Bool = false
     @State private var womenIconBounce: Bool = false
 
-    let cells = [
-        Cell(name: "Decathlon", jpName: "十種競技", gender: .Men, imagePath: "ten_hero"),
-        Cell(name: "Heptathlon", jpName: "七種競技",gender: .Women, imagePath: "seven_hero"),
-        Cell(name: "Octathlon", jpName: "八種競技", gender: .Men, imagePath: "eight_hero"),
-        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Women, imagePath: "four_hero"),
-        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Men, imagePath: "four_hero")
-    ]
-
-    @ViewBuilder
-    func destinationView(for cell: Cell) -> some View {
-        switch cell.name {
-        case "Decathlon": DecathlonView()
-        default:
-            DecathlonView()
-        }
+    struct EventButtonInfo: Identifiable {
+        var id = UUID()
+        var gender: Gender
+        var event: CombinedEvent
     }
+
+    var buttons: [EventButtonInfo] = {
+        let menEvents = CombinedEvent.menEvents.map {
+            EventButtonInfo(
+                gender: .Men,
+                event: $0
+            )
+        }
+        let womenEvents = CombinedEvent.womenEvents.map {
+            EventButtonInfo(
+                gender: .Women,
+                event: $0
+            )
+        }
+        return menEvents + womenEvents
+    }()
 
     var body: some View {
         NavigationStack {
@@ -78,14 +74,14 @@ struct HomeView: View {
 
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(cells) { cell in
+                        ForEach(buttons) { button in
                             NavigationLink(
-                                destination: destinationView(for: cell)
+                                destination: Router.Score(button.event)
                             ) {
-                                viewModel.selectedGender == cell.gender ? EventButton(
-                                    title: cell.name,
-                                    subTitle: cell.jpName,
-                                    imagePath: cell.imagePath
+                                viewModel.selectedGender == button.gender ? EventButton(
+                                    title: button.event.description,
+                                    subTitle: button.event.jpName,
+                                    imagePath: button.event.heroImagePath
                                 ) : nil
                             }
                         }
@@ -98,5 +94,4 @@ struct HomeView: View {
 
 #Preview {
     HomeView(viewModel: .init(selectedGender: .Men))
-        .modelContainer(for: Item.self, inMemory: true)
 }

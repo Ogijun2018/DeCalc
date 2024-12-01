@@ -10,6 +10,7 @@ import SwiftUI
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var selectedGender: Gender
+    @Published var router: Router?
 
     init(selectedGender: Gender = .Men) {
         self.selectedGender = selectedGender
