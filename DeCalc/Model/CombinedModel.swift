@@ -31,42 +31,70 @@ struct CombinedModel {
         }
     }
 
-    enum Event {
+    enum Event: CustomStringConvertible {
+        var description: String {
+            switch self {
+            case .Run(let event): event.rawValue
+            case .Jump(let event): event.description
+            case .Throw(let event): event.description
+            }
+        }
+
         case Run(RunEvent)
         case Jump(JumpEvent)
         case Throw(ThrowEvent)
 
-        enum RunEvent {
+        enum RunEvent: String {
             /// 110mH
-            case hundredTenMHurdles
+            case hundredTenMHurdles = "110mH"
             /// 400m
-            case fourHundredM
+            case fourHundredM = "400m"
             /// 100m
-            case hundredM
+            case hundredM = "100m"
             /// 1500m
-            case thousandFiveHundredM
+            case thousandFiveHundredM = "1500m"
             /// 100mH
-            case hundredMHurdles
+            case hundredMHurdles = "100mH"
             /// 200m
-            case twoHundredM
+            case twoHundredM = "200m"
             /// 800m
-            case eightHundredM
+            case eightHundredM = "800m"
         }
-        enum JumpEvent {
+        // Associated ValuesとrawValuesは同時に利用できない
+        // ref: https://medium.com/@hdk2200/swift-enum-associatedvalues-and-rawvalues-error-29d2bc92b90a
+        // CustomStringConvertibleを使用することで種目ごとのStringを取り出せるようにする
+        enum JumpEvent: CustomStringConvertible {
             /// 走幅跳
             case longjump(Gender)
             /// 走高跳
             case highjump(Gender)
             /// 棒高跳
             case paulVault
+
+            var description: String {
+                switch self {
+                case .highjump: "High Jump"
+                case .longjump: "Long Jump"
+                case .paulVault: "Paul Vault"
+                }
+            }
+
         }
-        enum ThrowEvent {
+        enum ThrowEvent: CustomStringConvertible {
             /// 砲丸投
             case shotput(Gender)
             /// やり投
             case javelinThrow(Gender)
             /// 円盤投
             case discusThrow
+
+            var description: String {
+                switch self {
+                case .shotput: "Shot Put"
+                case .javelinThrow: "Javelin Throw"
+                case .discusThrow: "Discus Throw"
+                }
+            }
         }
 
         var firstCoefficient: Double {

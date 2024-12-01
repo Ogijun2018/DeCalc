@@ -26,11 +26,11 @@ struct HomeView: View {
     @State private var womenIconBounce: Bool = false
 
     let cells = [
-        Cell(name: "Decathlon", jpName: "十種競技", gender: .Men, imagePath: "ten_hero_image"),
-        Cell(name: "Heptathlon", jpName: "七種競技",gender: .Women, imagePath: "seven_hero_image"),
-        Cell(name: "Octathlon", jpName: "八種競技", gender: .Men, imagePath: "eight_hero_image"),
-        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Women, imagePath: "four_hero_image"),
-        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Men, imagePath: "four_hero_image")
+        Cell(name: "Decathlon", jpName: "十種競技", gender: .Men, imagePath: "ten_hero"),
+        Cell(name: "Heptathlon", jpName: "七種競技",gender: .Women, imagePath: "seven_hero"),
+        Cell(name: "Octathlon", jpName: "八種競技", gender: .Men, imagePath: "eight_hero"),
+        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Women, imagePath: "four_hero"),
+        Cell(name: "Tetrathlon", jpName: "四種競技", gender: .Men, imagePath: "four_hero")
     ]
 
     @ViewBuilder
@@ -73,13 +73,16 @@ struct HomeView: View {
                         minHeight: 30
                     ).buttonStyle(.plain)
                 }
+                .padding()
+                .background(Color.secondaryColor)
+
                 ScrollView {
-                    VStack(spacing: 10) {
+                    VStack(spacing: 0) {
                         ForEach(cells) { cell in
                             NavigationLink(
                                 destination: destinationView(for: cell)
                             ) {
-                                viewModel.selectedGender == cell.gender ? ClaymorphismButton(
+                                viewModel.selectedGender == cell.gender ? EventButton(
                                     title: cell.name,
                                     subTitle: cell.jpName,
                                     imagePath: cell.imagePath
@@ -88,7 +91,7 @@ struct HomeView: View {
                         }
                     }.padding()
                 }
-            }
+            }.background(Color.primaryColor)
         }
     }
 }
