@@ -15,6 +15,11 @@ final class DecathlonViewModel: ObservableObject {
         print("onPressCalcButton")
     }
 
+    func didCompleteScore(info: EventTextFieldInfo, infoIndex: Int, score: Int) {
+        let eventInfo: EventInfo = .init(event: info.event, score: score)
+        events[].score = eventInfo.point
+    }
+
     init(combinedEvent: CombinedEvent) {
         self.events = combinedEvent.events.map { .init(event: $0.event) }
     }
@@ -26,7 +31,7 @@ extension Event {
         switch self {
         case .Run(let event):
             switch event {
-            case .eightHundredM, .thousandFiveHundredM: return 6
+            case .eightHundredM, .thousandFiveHundredM: return 5
             case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: return 4
             }
         case .Jump: return 3

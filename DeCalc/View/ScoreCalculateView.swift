@@ -14,31 +14,40 @@ struct ScoreCalculateView: View {
     @ViewBuilder
     func destinationView(for cell: EventTextFieldInfo) -> some View {
         GroupBox {
-            Text(cell.event.description)
-            OTPTextView(
-                pinLength: cell.event.digit,
-                leadingUnit: cell.event.leadUnit,
-                centerUnit: cell.event.centerUnit,
-                trailingUnit: cell.event.trailUnit,
-                unitPoint: cell.event.unitPoint
-            ) { value in
-                print(value)
+            VStack(spacing: 0) {
+                HStack {
+                    Text(cell.event.description)
+                        .font(.system(size: 25, weight: .heavy))
+                    Spacer()
+                }
+                RecordTextView(
+                    numberLength: cell.event.digit,
+                    leadingUnit: cell.event.leadUnit,
+                    centerUnit: cell.event.centerUnit,
+                    trailingUnit: cell.event.trailUnit,
+                    unitPoint: cell.event.unitPoint
+                ) { value in
+                    print(value)
+                }
+                HStack {
+                    Spacer()
+                    Text("Score:")
+                        .font(.system(size: 20, weight: .bold))
+                    Text("765")
+                        .font(.system(size: 20, weight: .bold))
+                }
             }
         }
     }
 
     var body: some View {
         ScrollView {
-            HStack {
-                // 記録
-                VStack {
-                    Text("記録")
-                    ForEach(viewModel.events) { event in
-                        destinationView(for: event)
-                    }
-                    Text(String(viewModel.score))
+            VStack {
+                ForEach(viewModel.events) { event in
+                    destinationView(for: event)
+                        .padding(.horizontal)
                 }
-                Spacer().frame(width: 200)
+                Text(String(viewModel.score))
             }
         }
     }
