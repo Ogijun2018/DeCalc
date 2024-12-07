@@ -1,5 +1,5 @@
 //
-//  DecathlonViewModel.swift
+//  ScoreCalculateViewModel.swift
 //  DeCalc
 //
 //  Created by Jun Ogino on 2024/11/29.
@@ -7,21 +7,19 @@
 
 import SwiftUI
 
-final class DecathlonViewModel: ObservableObject {
-    @Published var score = 0
-    @Published var events: [EventTextFieldInfo]
+final class ScoreCalculateViewModel: ObservableObject {
+    @Published var combinedEventInfo: CombinedEventInfo
 
     func onPressCalcButton() {
         print("onPressCalcButton")
     }
 
-    func didCompleteScore(info: EventTextFieldInfo, infoIndex: Int, score: Int) {
-        let eventInfo: EventInfo = .init(event: info.event, score: score)
-        events[].score = eventInfo.point
+    func didCompleteScore(index: Int, score: Int) {
+        combinedEventInfo.events[index].score = score
     }
 
     init(combinedEvent: CombinedEvent) {
-        self.events = combinedEvent.events.map { .init(event: $0.event) }
+        self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
     }
 }
 

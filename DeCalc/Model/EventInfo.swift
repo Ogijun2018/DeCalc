@@ -7,7 +7,8 @@
 
 import Foundation
 /// 混成種目が持つ一種目の情報を持つstruct
-struct EventInfo {
+struct EventInfo: Identifiable {
+    var id = UUID()
     /// 種目
     var event: Event
     /// 一種目の記録
