@@ -78,15 +78,15 @@ struct RecordTextView: View {
                 onComplete(record ?? 0)
             }
         }
-        .onTapGesture {
-            print("onTapGesture")
-            self.isFocused = true
-        }
         .onAppear{
             UITextField.appearance().clearButtonMode = .never
             UITextField.appearance().tintColor = UIColor.clear
         }
         .padding()
+        // contentShapreを行うことでTextView全体をタップ可能にする
+        // 参照: https://www.hackingwithswift.com/quick-start/swiftui/how-to-control-the-tappable-area-of-a-view-using-contentshape
+        .contentShape(Rectangle())
+        .onTapGesture { self.isFocused.toggle() }
     }
 
     func getPin(at index: Int) -> String {
