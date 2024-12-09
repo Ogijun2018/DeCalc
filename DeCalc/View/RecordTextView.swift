@@ -2,17 +2,19 @@ import SwiftUI
 
 struct RecordTextView: View {
     @State private var record: String = ""
-    @FocusState private var isFocused: Bool
+    @FocusState.Binding var isFocused: Focus?
 
     var numberLength: Int
     var leadingUnit: String?
     var centerUnit: String
     var trailingUnit: String?
     var unitPoint: Int
+    var textFieldId: Int
     /// 長距離種目かどうか
     var isLongRunning: Bool = false
     var keyboardType: UIKeyboardType = .numberPad
-    var onComplete: (Int) -> ()
+    var onComplete: ((Int) -> Void)?
+    var onPressTextView: (() -> Void)?
 
     // TODO: ここロジックやばいから整理
     func getPinIndex(index: Int) -> Int {
@@ -73,10 +75,11 @@ struct RecordTextView: View {
             RecordTextField(
                 record: $record,
                 numberLength: numberLength,
+                textFieldId: textFieldId,
                 isFocused: $isFocused
             ) {
                 // 入力が完了したらIntに変換して計算を行う
-                onComplete(Int(record) ?? 0)
+                onComplete?(Int(record) ?? 0)
             }
         }
         .onAppear{
@@ -87,7 +90,9 @@ struct RecordTextView: View {
         // contentShapreを行うことでTextView全体をタップ可能にする
         // 参照: https://www.hackingwithswift.com/quick-start/swiftui/how-to-control-the-tappable-area-of-a-view-using-contentshape
         .contentShape(Rectangle())
-        .onTapGesture { self.isFocused.toggle() }
+        .onTapGesture {
+            onPressTextView?()
+        }
     }
 
     func getPin(at index: Int) -> String {
@@ -108,13 +113,14 @@ struct RecordTextView: View {
         // 例: 100m 09"98
         @Binding var record: String
         var numberLength: Int
-        @FocusState.Binding var isFocused: Bool
+        var textFieldId: Int
+        @FocusState.Binding var isFocused: Focus?
         var didComplete: (() -> Void)?
 
         var body: some View {
             TextField("", text: $record)
                 .frame(width: 0, height: 0, alignment: .center)
-                .focused($isFocused)
+                .focused($isFocused, equals: .focused(id: textFieldId))
                 .keyboardType(.numberPad)
                 .onChange(of: record) {
                     // 数値以外の入力があった場合はrecordの内容を消去する
@@ -132,15 +138,15 @@ struct RecordTextView: View {
 }
 
 #Preview {
+    @FocusState var isFocused: Focus?
     RecordTextView(
+        isFocused: $isFocused,
         numberLength: 5,
         leadingUnit: ":",
         centerUnit: "\"",
         trailingUnit: nil,
         unitPoint: 5,
-        isLongRunning: true,
-        onComplete: { value in
-            print(value)
-        }
+        textFieldId: 5,
+        isLongRunning: true
     )
 }
