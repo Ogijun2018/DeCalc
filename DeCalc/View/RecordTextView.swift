@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecordTextView: View {
-    @State private var record: Int?
+    @State private var record: String = ""
     @FocusState private var isFocused: Bool
 
     var numberLength: Int
@@ -75,7 +75,8 @@ struct RecordTextView: View {
                 numberLength: numberLength,
                 isFocused: $isFocused
             ) {
-                onComplete(record ?? 0)
+                // 入力が完了したらIntに変換して計算を行う
+                onComplete(Int(record) ?? 0)
             }
         }
         .onAppear{
@@ -90,49 +91,40 @@ struct RecordTextView: View {
     }
 
     func getPin(at index: Int) -> String {
-        guard let record else {
-            return ""
-        }
-        let stringRecord = String(record)
-        guard index >= 0 && stringRecord.count > index else {
+        guard index >= 0 && record.count > index else {
             return ""
         }
         // String.Indexを計算
-        let stringIndex = stringRecord.index(stringRecord.startIndex, offsetBy: index)
+        let stringIndex = record.index(record.startIndex, offsetBy: index)
 
         // 該当文字を返す
-        return String(stringRecord[stringIndex])
+        return String(record[stringIndex])
     }
 
     /// 実際には表示されないTextField
     /// このTextFieldで変更された数値をBindしてRecordTextViewで表示している
     struct RecordTextField: View {
-        @Binding var record: Int?
+        // recordは0始まりを許容しなければならないため、IntではなくStringを使用している
+        // 例: 100m 09"98
+        @Binding var record: String
         var numberLength: Int
         @FocusState.Binding var isFocused: Bool
         var didComplete: (() -> Void)?
 
-        // NOTE: TextField(_, value, format: .number)を使うと自動的にカンマ区切りがついてしまい、表示が崩れるため独自でFormatterを作成している
-        @State private var numberFormatter: NumberFormatter = {
-            var nf = NumberFormatter()
-            nf.numberStyle = .decimal
-            // カンマ区切りを行わない
-            nf.usesGroupingSeparator = false
-            return nf
-        }()
-
         var body: some View {
-            TextField(
-                "", value: $record,
-                formatter: numberFormatter
-            )
+            TextField("", text: $record)
                 .frame(width: 0, height: 0, alignment: .center)
                 .focused($isFocused)
                 .keyboardType(.numberPad)
                 .onChange(of: record) {
-                    guard let record, String(record).count >= numberLength else { return }
+                    // 数値以外の入力があった場合はrecordの内容を消去する
+                    guard let _ = Int(record) else {
+                        self.record = ""
+                        return
+                    }
+                    guard record.count >= numberLength else { return }
                     // 最初に入力されたnumberLength分だけ取り出してあとは切り捨てる
-                    self.record = Int(String(record).prefix(numberLength))
+                    self.record = String(record.prefix(numberLength))
                     didComplete?()
                 }
         }
