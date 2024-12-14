@@ -8,7 +8,7 @@
 import Foundation
 
 /// 種目の情報のenum
-enum Event: CustomStringConvertible {
+enum Event: CustomStringConvertible, Hashable {
 
     case Run(RunEvent)
     case Jump(JumpEvent)
@@ -34,7 +34,7 @@ enum Event: CustomStringConvertible {
     // Associated ValuesとrawValuesは同時に利用できない
     // ref: https://medium.com/@hdk2200/swift-enum-associatedvalues-and-rawvalues-error-29d2bc92b90a
     // CustomStringConvertibleを使用することで種目ごとのStringを取り出せるようにする
-    enum JumpEvent: CustomStringConvertible {
+    enum JumpEvent: CustomStringConvertible, Hashable {
         /// 走幅跳
         case longjump(Gender)
         /// 走高跳
@@ -51,7 +51,7 @@ enum Event: CustomStringConvertible {
         }
 
     }
-    enum ThrowEvent: CustomStringConvertible {
+    enum ThrowEvent: CustomStringConvertible, Hashable {
         /// 砲丸投
         case shotput(Gender)
         /// やり投

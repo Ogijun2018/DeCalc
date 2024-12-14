@@ -10,12 +10,13 @@ import SwiftUI
 final class ScoreCalculateViewModel: ObservableObject {
     @Published var combinedEventInfo: CombinedEventInfo
 
-    func onPressCalcButton() {
-        print("onPressCalcButton")
+    /// 記録のTextViewをタップしたときに
+    func onPressRecordTextView(id: Int) {
+
     }
 
-    func didCompleteScore(index: Int, score: Int) {
-        combinedEventInfo.events[index].score = score
+    func didCompletePoint(index: Int, point: Int) {
+        combinedEventInfo.events[index].point = point
     }
 
     init(combinedEvent: CombinedEvent) {

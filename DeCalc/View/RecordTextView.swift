@@ -1,7 +1,8 @@
 import SwiftUI
+import Combine
 
 struct RecordTextView: View {
-    @State private var record: String = ""
+    @Binding var record: String?
     @FocusState.Binding var isFocused: Focus?
 
     var numberLength: Int
@@ -13,7 +14,6 @@ struct RecordTextView: View {
     /// 長距離種目かどうか
     var isLongRunning: Bool = false
     var keyboardType: UIKeyboardType = .numberPad
-    var onComplete: ((Int) -> Void)?
     var onPressTextView: (() -> Void)?
 
     // TODO: ここロジックやばいから整理
@@ -73,14 +73,14 @@ struct RecordTextView: View {
                 Spacer()
             }
             RecordTextField(
-                record: $record,
-                numberLength: numberLength,
                 textFieldId: textFieldId,
-                isFocused: $isFocused
-            ) {
-                // 入力が完了したらIntに変換して計算を行う
-                onComplete?(Int(record) ?? 0)
-            }
+                maxLength: numberLength,
+                isFocused: $isFocused,
+                onChanged: { text in
+                    guard let text else { return }
+                    record = text
+                }
+            )
         }
         .onAppear{
             UITextField.appearance().clearButtonMode = .never
@@ -96,7 +96,7 @@ struct RecordTextView: View {
     }
 
     func getPin(at index: Int) -> String {
-        guard index >= 0 && record.count > index else {
+        guard let record, index >= 0 && record.count > index else {
             return ""
         }
         // String.Indexを計算
@@ -107,39 +107,37 @@ struct RecordTextView: View {
     }
 
     /// 実際には表示されないTextField
-    /// このTextFieldで変更された数値をBindしてRecordTextViewで表示している
+    /// このTextFieldで変更された数値をonChangeで取得し、RecordTextViewでBindしているrecordを更新する
     struct RecordTextField: View {
         // recordは0始まりを許容しなければならないため、IntではなくStringを使用している
         // 例: 100m 09"98
-        @Binding var record: String
-        var numberLength: Int
+        @State var record: String = ""
         var textFieldId: Int
+        var maxLength: Int
         @FocusState.Binding var isFocused: Focus?
-        var didComplete: (() -> Void)?
+        var onChanged: ((String?) -> Void)?
 
         var body: some View {
             TextField("", text: $record)
+                .onReceive(Just(record)) { _ in
+                    // maxLength桁以降の入力を制限
+                    record = String(record.prefix(maxLength))
+                }
                 .frame(width: 0, height: 0, alignment: .center)
                 .focused($isFocused, equals: .focused(id: textFieldId))
                 .keyboardType(.numberPad)
-                .onChange(of: record) {
-                    // 数値以外の入力があった場合はrecordの内容を消去する
-                    guard let _ = Int(record) else {
-                        self.record = ""
-                        return
-                    }
-                    guard record.count >= numberLength else { return }
-                    // 最初に入力されたnumberLength分だけ取り出してあとは切り捨てる
-                    self.record = String(record.prefix(numberLength))
-                    didComplete?()
-                }
+                .onChange(of: record, {
+                    onChanged?(record)
+                })
         }
     }
 }
 
 #Preview {
+    @Previewable @State var record: String? = ""
     @FocusState var isFocused: Focus?
     RecordTextView(
+        record: $record,
         isFocused: $isFocused,
         numberLength: 5,
         leadingUnit: ":",

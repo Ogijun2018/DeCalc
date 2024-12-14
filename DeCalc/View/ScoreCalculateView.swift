@@ -9,15 +9,16 @@ import SwiftUI
 import SwiftData
 
 struct ScoreCalculateView: View {
-    @ObservedObject var viewModel: ScoreCalculateViewModel
+    @StateObject var viewModel: ScoreCalculateViewModel
     // FocusStateはnilの場合にキーボード非表示を表現する
     // 現状は一つのcaseを持つenumを用いている
-    @FocusState var isFocused: Focus?
+    @FocusState var isScoreFocused: Focus?
+    @FocusState var isPointFocused: Focus?
 
     var body: some View {
         NavigationView {
             ScrollView {
-                ForEach(viewModel.combinedEventInfo.events) { event in
+                ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
                     GroupBox {
                         VStack(spacing: 0) {
                             HStack {
@@ -25,35 +26,33 @@ struct ScoreCalculateView: View {
                                     .font(.system(size: 25, weight: .heavy))
                                 Spacer()
                             }
-                            RecordTextView(
-                                isFocused: $isFocused,
-                                numberLength: event.event.digit,
-                                leadingUnit: event.event.leadUnit,
-                                centerUnit: event.event.centerUnit,
-                                trailingUnit: event.event.trailUnit,
-                                unitPoint: event.event.unitPoint,
-                                textFieldId: event.id.hashValue,
-                                onComplete: { value in
-                                    if let index = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
-                                        viewModel.didCompleteScore(
-                                            index: index,
-                                            score: value
-                                        )
+                            if let eventIndex = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
+                                RecordTextView(
+                                    record: $viewModel.combinedEventInfo.events[eventIndex].score,
+                                    isFocused: $isScoreFocused,
+                                    numberLength: event.event.digit,
+                                    leadingUnit: event.event.leadUnit,
+                                    centerUnit: event.event.centerUnit,
+                                    trailingUnit: event.event.trailUnit,
+                                    unitPoint: event.event.unitPoint,
+                                    textFieldId: event.id.hashValue,
+                                    onPressTextView: {
+                                        isScoreFocused = switch isScoreFocused {
+                                        case .focused: nil
+                                        case nil: .focused(id: event.id.hashValue)
+                                        }
                                     }
-                                },
-                                onPressTextView: {
-                                    isFocused = switch isFocused {
-                                    case .focused: nil
-                                    case nil: .focused(id: event.id.hashValue)
-                                    }
+                                )
+                                HStack {
+                                    Spacer()
+                                    Text("Score:")
+                                        .font(.system(size: 20, weight: .bold))
+                                    ScoreTextView(
+                                        point: $viewModel.combinedEventInfo.events[eventIndex].point,
+                                        isFocused: $isPointFocused,
+                                        textFieldId: event.idForScore.hashValue
+                                    )
                                 }
-                            )
-                            HStack {
-                                Spacer()
-                                Text("Score:")
-                                    .font(.system(size: 20, weight: .bold))
-                                Text(String(event.point))
-                                    .font(.system(size: 20, weight: .bold))
                             }
                         }
                     }.padding(.horizontal)
