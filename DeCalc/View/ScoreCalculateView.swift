@@ -41,17 +41,23 @@ struct ScoreCalculateView: View {
                     case .focused: nil
                     case nil: .focused(id: event.id.hashValue)
                     }
+                  },
+                  scoreFilled: {
+                    viewModel.scoreFilled(index: eventIndex)
                   }
                 )
                 HStack {
                   Spacer()
-                  Text("Score:")
+                  Text("Point:")
                     .font(.system(size: 20, weight: .bold))
                   ScoreTextView(
                     point: $viewModel.combinedEventInfo.events[eventIndex].point,
                     isFocused: $isPointFocused,
                     textFieldId: event.idForScore.hashValue
                   )
+                  Button("Point to Score") {
+                    viewModel.calculateButtonDidTap(index: eventIndex)
+                  }
                 }
               }
             }
@@ -61,7 +67,7 @@ struct ScoreCalculateView: View {
       .safeAreaInset(edge: .top) {
         VStack(alignment: .leading, spacing: 4) {
           HStack() {
-            Text("Total Score:")
+            Text("Total Point:")
               .font(.largeTitle.weight(.bold))
             Spacer()
             Text(String(viewModel.combinedEventInfo.point))

@@ -8,67 +8,87 @@
 import SwiftUI
 
 final class ScoreCalculateViewModel: ObservableObject {
-    @Published var combinedEventInfo: CombinedEventInfo
+  @Published var combinedEventInfo: CombinedEventInfo
 
-    /// 記録のTextViewをタップしたときに
-    func onPressRecordTextView(id: Int) {
+  /// 記録のTextViewをタップしたときに
+  func onPressRecordTextView(id: Int) {
+  }
 
+  func scoreFilled(index: Int) {
+    let eventInfo = combinedEventInfo.events[index]
+    let score = eventInfo.score
+    guard let score, let intScore = Int(score) else { return }
+    do {
+      combinedEventInfo.events[index].point = try eventInfo.convertToPoint(score: intScore)
+    } catch {
+      combinedEventInfo.events[index].point = 0
     }
+  }
 
-    func didCompletePoint(index: Int, point: Int) {
-        combinedEventInfo.events[index].point = point
+  func calculateButtonDidTap(index: Int) {
+    let eventInfo = combinedEventInfo.events[index]
+    let point = eventInfo.point
+    do {
+      combinedEventInfo.events[index].score = try String(eventInfo.convertToScore(point: point))
+    } catch {
+      combinedEventInfo.events[index].score = ""
     }
+  }
 
-    init(combinedEvent: CombinedEvent) {
-        self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
-    }
+  func didCompletePoint(index: Int, point: Int) {
+    combinedEventInfo.events[index].point = point
+  }
+
+  init(combinedEvent: CombinedEvent) {
+    self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
+  }
 }
 
 extension Event {
-    /// 記録入力時の桁数
-    var digit: Int {
-        switch self {
-        case .Run(let event):
-            switch event {
-            case .eightHundredM, .thousandFiveHundredM: return 5
-            case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: return 4
-            }
-        case .Jump: return 3
-        case .Throw: return 4
-        }
+  /// 記録入力時の桁数
+  var digit: Int {
+    switch self {
+    case .Run(let event):
+      switch event {
+      case .eightHundredM, .thousandFiveHundredM: return 5
+      case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: return 4
+      }
+    case .Jump: return 3
+    case .Throw: return 4
     }
-    /// 単位1
-    var leadUnit: String? {
-        switch self {
-        case .Run(.eightHundredM), .Run(.thousandFiveHundredM): "'"
-        default: nil
-        }
+  }
+  /// 単位1
+  var leadUnit: String? {
+    switch self {
+    case .Run(.eightHundredM), .Run(.thousandFiveHundredM): "'"
+    default: nil
     }
-    /// 単位2
-    var centerUnit: String {
-        switch self {
-        case .Run: "\""
-        case .Jump, .Throw: "m"
-        }
+  }
+  /// 単位2
+  var centerUnit: String {
+    switch self {
+    case .Run: "\""
+    case .Jump, .Throw: "m"
     }
-    /// 単位3
-    var trailUnit: String? {
-        switch self {
-        case .Run: nil
-        case .Jump, .Throw: "cm"
-        }
+  }
+  /// 単位3
+  var trailUnit: String? {
+    switch self {
+    case .Run: nil
+    case .Jump, .Throw: "cm"
     }
-    /// 単位をどこで区切るか
-    var unitPoint: Int {
-        switch self {
-        case .Jump: 1
-        case .Throw: 2
-        case .Run(let event):
-            switch event {
-            /// 一時的に2にしているが、800m/1500mのみ間に2つ挟まるため単純なIntでは表現できていない
-            case .eightHundredM, .thousandFiveHundredM: 2
-            case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: 2
-            }
-        }
+  }
+  /// 単位をどこで区切るか
+  var unitPoint: Int {
+    switch self {
+    case .Jump: 1
+    case .Throw: 2
+    case .Run(let event):
+      switch event {
+        /// 一時的に2にしているが、800m/1500mのみ間に2つ挟まるため単純なIntでは表現できていない
+      case .eightHundredM, .thousandFiveHundredM: 2
+      case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: 2
+      }
     }
+  }
 }
