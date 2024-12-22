@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct ScoreCalculateView: View {
   @StateObject var viewModel: ScoreCalculateViewModel
@@ -58,6 +59,11 @@ struct ScoreCalculateView: View {
                   Button("Point→Score") {
                     viewModel.calculateButtonDidTap(index: eventIndex)
                   }
+                }
+                if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
+                  Text(error)
+                    .font(.system(size: 20))
+                    .foregroundStyle(.red)
                 }
               }
             }

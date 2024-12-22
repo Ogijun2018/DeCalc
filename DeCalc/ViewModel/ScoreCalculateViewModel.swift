@@ -29,13 +29,21 @@ final class ScoreCalculateViewModel: ObservableObject {
     let eventInfo = combinedEventInfo.events[index]
     let point = eventInfo.point
     do {
+      combinedEventInfo.events[index].errorText = ""
       // 計算後の記録の桁数がdigitに満たない場合は0埋めする
       // ex. 100m 1100pt → 09"98
       combinedEventInfo.events[index].score = try String(
         format: "%0\(eventInfo.event.digit)d",
         eventInfo.convertToScore(point: point)
       )
+    } catch EventInfo.CalculationError.overPoint {
+      combinedEventInfo.events[index].errorText = "ポイントは\(eventInfo.maxPoint)以下を入力してください"
+      combinedEventInfo.events[index].score = ""
+    } catch EventInfo.CalculationError.invalidResult {
+      combinedEventInfo.events[index].errorText = "入力エラー"
+      combinedEventInfo.events[index].score = ""
     } catch {
+      combinedEventInfo.events[index].errorText = "入力エラー"
       combinedEventInfo.events[index].score = ""
     }
   }

@@ -16,10 +16,30 @@ struct EventInfo: Identifiable, Hashable {
   var score: String?
   /// 一種目の点数
   var point: Int = 0
+  /// 種目の最大点数（理論値）
+  var maxPoint: Int {
+    switch event {
+    case .Run:
+      // 0.01s
+      return Int(event.firstCoefficient * pow(event.secondCoefficient - 0.01, event.thirdCoefficient))
+    case .Jump:
+      // 9m99cm
+      return Int(event.firstCoefficient * pow(Double(999) - event.secondCoefficient, event.thirdCoefficient))
+    case .Throw:
+      // 99m99cm
+      return Int(event.firstCoefficient * pow(event.secondCoefficient - 99.99, event.thirdCoefficient))
+    }
+  }
+
+  /// エラーテキスト
+  var errorText: String?
 
   func convertToScore(point: Int) throws -> Int {
     switch event {
     case .Run:
+      if try convertToPoint(score: 0001) < point {
+        throw CalculationError.overPoint
+      }
       // 逆計算でscoreを求める
       let doublePoint = Double(point)
       let score = event.secondCoefficient - pow(doublePoint / event.firstCoefficient, 1 / event.thirdCoefficient)
@@ -31,6 +51,9 @@ struct EventInfo: Identifiable, Hashable {
       }
       return convertScoreToInt(seconds: score)
     case .Jump:
+      if try convertToPoint(score: 999) < point {
+        throw CalculationError.overPoint
+      }
       // 逆計算でscoreを求める
       let doublePoint = Double(point)
       let score = event.secondCoefficient + pow(doublePoint / event.firstCoefficient, 1 / event.thirdCoefficient)
@@ -43,6 +66,9 @@ struct EventInfo: Identifiable, Hashable {
       // 跳躍種目の場合はcmのままなので四捨五入を行う
       return Int(round(score))
     case .Throw:
+      if try convertToPoint(score: 9999) < point {
+        throw CalculationError.overPoint
+      }
       // 逆計算でscoreを求める
       let doublePoint = Double(point)
       let score = event.secondCoefficient + pow(doublePoint / event.firstCoefficient, 1 / event.thirdCoefficient)
@@ -112,6 +138,8 @@ struct EventInfo: Identifiable, Hashable {
 
   enum CalculationError: Error {
     case invalidResult
+    /// 最大ポイントを超過
+    case overPoint
   }
 
   init(event: Event, score: String? = nil, point: Int? = nil) {
