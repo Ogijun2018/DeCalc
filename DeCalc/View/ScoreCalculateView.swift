@@ -93,7 +93,7 @@ struct ScoreCalculateView: View {
     }) {
       Image(systemName: "trash")
     })
-    .tint(.purple)
+    .tint(Color.primaryColor)
   }
 }
 

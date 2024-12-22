@@ -89,10 +89,6 @@ struct RecordTextView: View {
         }
       )
     }
-    .onAppear{
-      UITextField.appearance().clearButtonMode = .never
-      UITextField.appearance().tintColor = UIColor.clear
-    }
     .padding()
     // contentShapreを行うことでTextView全体をタップ可能にする
     // 参照: https://www.hackingwithswift.com/quick-start/swiftui/how-to-control-the-tappable-area-of-a-view-using-contentshape
@@ -127,9 +123,9 @@ struct RecordTextView: View {
     var body: some View {
       TextField("", text: $record ?? "")
         .onReceive(Just(record)) { _ in
+          guard record != nil, record?.count ?? 0 > maxLength else { return }
           // maxLength桁以降の入力を制限
-          guard var record else { return }
-          record = String(record.prefix(maxLength))
+          record = String(record?.prefix(maxLength) ?? "")
         }
         .frame(width: 0, height: 0, alignment: .center)
         .focused($isFocused, equals: .focused(id: textFieldId))
