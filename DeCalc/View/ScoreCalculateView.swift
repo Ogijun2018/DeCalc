@@ -55,7 +55,7 @@ struct ScoreCalculateView: View {
                     isFocused: $isPointFocused,
                     textFieldId: event.idForScore.hashValue
                   )
-                  Button("Point to Score") {
+                  Button("Point→Score") {
                     viewModel.calculateButtonDidTap(index: eventIndex)
                   }
                 }

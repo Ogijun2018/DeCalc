@@ -59,7 +59,9 @@ struct RecordTextView: View {
           } else if i != unitPoint {
             ZStack(alignment: .center) {
               RoundedRectangle(cornerRadius: 5)
-                .stroke(Color.gray, lineWidth: 2)
+                .stroke(isFocused == .focused(id: textFieldId)
+                        ? Color.primaryColor
+                        : .gray, lineWidth: 2)
                 .frame(
                   width: 40,
                   height: 40
@@ -74,6 +76,7 @@ struct RecordTextView: View {
         Spacer()
       }
       RecordTextField(
+        record: $record,
         textFieldId: textFieldId,
         maxLength: numberLength,
         isFocused: $isFocused,
@@ -115,16 +118,17 @@ struct RecordTextView: View {
   struct RecordTextField: View {
     // recordは0始まりを許容しなければならないため、IntではなくStringを使用している
     // 例: 100m 09"98
-    @State var record: String = ""
+    @Binding var record: String?
     var textFieldId: Int
     var maxLength: Int
     @FocusState.Binding var isFocused: Focus?
     var onChanged: ((String?) -> Void)?
 
     var body: some View {
-      TextField("", text: $record)
+      TextField("", text: $record ?? "")
         .onReceive(Just(record)) { _ in
           // maxLength桁以降の入力を制限
+          guard var record else { return }
           record = String(record.prefix(maxLength))
         }
         .frame(width: 0, height: 0, alignment: .center)

@@ -29,7 +29,12 @@ final class ScoreCalculateViewModel: ObservableObject {
     let eventInfo = combinedEventInfo.events[index]
     let point = eventInfo.point
     do {
-      combinedEventInfo.events[index].score = try String(eventInfo.convertToScore(point: point))
+      // 計算後の記録の桁数がdigitに満たない場合は0埋めする
+      // ex. 100m 1100pt → 09"98
+      combinedEventInfo.events[index].score = try String(
+        format: "%0\(eventInfo.event.digit)d",
+        eventInfo.convertToScore(point: point)
+      )
     } catch {
       combinedEventInfo.events[index].score = ""
     }
