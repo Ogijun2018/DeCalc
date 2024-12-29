@@ -37,7 +37,7 @@ final class ScoreCalculateViewModel: ObservableObject {
         eventInfo.convertToScore(point: point)
       )
     } catch EventInfo.CalculationError.overPoint {
-      combinedEventInfo.events[index].errorText = "ポイントは\(eventInfo.maxPoint)以下を入力してください"
+      combinedEventInfo.events[index].errorText = "点数は\(eventInfo.maxPoint)以下を入力してください"
       combinedEventInfo.events[index].score = ""
     } catch EventInfo.CalculationError.invalidResult {
       combinedEventInfo.events[index].errorText = "入力エラー"

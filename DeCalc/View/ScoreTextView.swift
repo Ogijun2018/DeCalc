@@ -33,7 +33,7 @@ struct ScoreTextView: View {
           .stroke(isFocused == .focused(id: textFieldId) ? Color.primaryColor : Color.gray, lineWidth: 2)
       )
       .textFieldStyle(RoundedBorderTextFieldStyle())
-      .padding()
+//      .padding()
       .font(.system(size: 20, weight: .bold))
       .focused($isFocused, equals: .focused(id: textFieldId))
       .keyboardType(.numberPad)

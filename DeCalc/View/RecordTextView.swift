@@ -37,7 +37,6 @@ struct RecordTextView: View {
   var body: some View {
     ZStack(alignment: .center) {
       HStack(alignment: .center) {
-        Spacer()
         ForEach(isLongRunning ? 0..<numberLength + 3 : 0..<numberLength + 2, id: \.self) { i in
           if isLongRunning && i == 2 {
             if let leadingUnit {
@@ -73,7 +72,6 @@ struct RecordTextView: View {
             }
           }
         }
-        Spacer()
       }
       RecordTextField(
         record: $record,

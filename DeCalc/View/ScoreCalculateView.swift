@@ -47,22 +47,23 @@ struct ScoreCalculateView: View {
                     viewModel.scoreFilled(index: eventIndex)
                   }
                 )
-                HStack {
-                  Spacer()
-                  Text("Point:")
-                    .font(.system(size: 20, weight: .bold))
+                HStack(spacing: 10) {
+                  Image(systemName: "p.circle")
                   ScoreTextView(
                     point: $viewModel.combinedEventInfo.events[eventIndex].point,
                     isFocused: $isPointFocused,
                     textFieldId: event.idForScore.hashValue
                   )
-                  Button("Point→Score") {
+                  Text("pt")
+                    .font(.system(size: 20, weight: .semibold))
+                  Spacer()
+                  Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "stopwatch"))") {
                     viewModel.calculateButtonDidTap(index: eventIndex)
                   }
                 }
                 if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
                   Text(error)
-                    .font(.system(size: 20))
+                    .font(.system(size: 11))
                     .foregroundStyle(.red)
                 }
               }
@@ -73,8 +74,8 @@ struct ScoreCalculateView: View {
       .safeAreaInset(edge: .top) {
         VStack(alignment: .leading, spacing: 4) {
           HStack() {
-            Text("Total Point:")
-              .font(.largeTitle.weight(.bold))
+            Label("Total Point", systemImage: "p.circle")
+              .font(.largeTitle.weight(.semibold))
             Spacer()
             Text(String(viewModel.combinedEventInfo.point))
               .font(.largeTitle.weight(.bold))
