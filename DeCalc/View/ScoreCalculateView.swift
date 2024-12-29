@@ -21,8 +21,10 @@ struct ScoreCalculateView: View {
       ScrollView {
         ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
           GroupBox {
-            VStack(spacing: 0) {
+            VStack(spacing: 5) {
               HStack {
+                Image(systemName: "figure.run.circle")
+                  .font(.system(size: 25))
                 Text(event.event.description)
                   .font(.system(size: 25, weight: .heavy))
                 Spacer()
@@ -49,6 +51,7 @@ struct ScoreCalculateView: View {
                 )
                 HStack(spacing: 10) {
                   Image(systemName: "p.circle")
+                    .font(.system(size: 25))
                   ScoreTextView(
                     point: $viewModel.combinedEventInfo.events[eventIndex].point,
                     isFocused: $isPointFocused,
@@ -56,15 +59,17 @@ struct ScoreCalculateView: View {
                   )
                   Text("pt")
                     .font(.system(size: 20, weight: .semibold))
-                  Spacer()
-                  Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "stopwatch"))") {
+                  Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
                     viewModel.calculateButtonDidTap(index: eventIndex)
                   }
+                  .buttonStyle(.borderedProminent)
+                  .cornerRadius(10)
                 }
                 if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
                   Text(error)
                     .font(.system(size: 11))
                     .foregroundStyle(.red)
+                    .padding(.top, 5)
                 }
               }
             }
