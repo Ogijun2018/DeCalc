@@ -17,16 +17,18 @@ struct RecordTextView: View {
   var onPressTextView: (() -> Void)?
   var scoreFilled: (() -> Void)?
 
-  // TODO: ここロジックやばいから整理
   func getPinIndex(index: Int) -> Int {
     // index: 今もらってきてるindex
-    // 長距離種目の場合
+    // 長距離種目の場合 (1500m: 4'30"50 の形式)
     if isLongRunning {
-      if index > 5 {
+      if index > 4 {
+        // 5番目以降（6,7番目）: 2つの単位記号('と")を飛ばす
         return index - 2
-      } else if index > unitPoint {
+      } else if index > 1 {
+        // 2-4番目（2,3,4番目）: 最初の単位記号(')を飛ばす
         return index - 1
       } else {
+        // 0-1番目: そのまま
         return index
       }
     } else {
@@ -38,13 +40,20 @@ struct RecordTextView: View {
     ZStack(alignment: .center) {
       HStack(alignment: .center) {
         ForEach(isLongRunning ? 0..<numberLength + 3 : 0..<numberLength + 2, id: \.self) { i in
-          if isLongRunning && i == 2 {
+          if isLongRunning && i == 1 {
+            // 1500m: 分記号（'）を1番目の位置に表示
             if let leadingUnit {
               Text(leadingUnit)
                 .font(.system(size: 20, weight: .semibold))
                 .frame(alignment: .bottom)
             }
-          } else if i == unitPoint {
+          } else if isLongRunning && i == 4 {
+            // 1500m: 秒記号（"）を4番目の位置に表示
+            Text(centerUnit)
+              .font(.system(size: 20, weight: .semibold))
+              .frame(alignment: .bottom)
+          } else if !isLongRunning && i == unitPoint {
+            // 他の種目の場合
             Text(centerUnit)
               .font(.system(size: 20, weight: .semibold))
               .frame(alignment: .bottom)

@@ -98,10 +98,20 @@ extension Event {
     case .Throw: 2
     case .Run(let event):
       switch event {
-        /// 一時的に2にしているが、800m/1500mのみ間に2つ挟まるため単純なIntでは表現できていない
-      case .eightHundredM, .thousandFiveHundredM: 2
+      case .eightHundredM, .thousandFiveHundredM: 2 // 長距離種目では専用ロジックを使用
       case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: 2
       }
+    }
+  }
+  /// 長距離種目かどうか（800m, 1500m）
+  var isLongRunning: Bool {
+    switch self {
+    case .Run(let event):
+      switch event {
+      case .eightHundredM, .thousandFiveHundredM: true
+      default: false
+      }
+    default: false
     }
   }
 }

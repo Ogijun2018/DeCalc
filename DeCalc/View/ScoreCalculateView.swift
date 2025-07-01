@@ -39,6 +39,7 @@ struct ScoreCalculateView: View {
                   trailingUnit: event.event.trailUnit,
                   unitPoint: event.event.unitPoint,
                   textFieldId: event.id.hashValue,
+                  isLongRunning: event.event.isLongRunning,
                   onPressTextView: {
                     isScoreFocused = switch isScoreFocused {
                     case .focused: nil
