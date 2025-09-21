@@ -91,6 +91,13 @@ extension Event {
     case .Jump, .Throw: "cm"
     }
   }
+  /// leadingUnitを差し込む桁数（recordの左からの桁数）
+  var leadUnitPoint: Int? {
+    switch self {
+    case .Run(.eightHundredM), .Run(.thousandFiveHundredM): 1
+    default: nil
+    }
+  }
   /// 単位をどこで区切るか
   var unitPoint: Int {
     switch self {
@@ -98,8 +105,7 @@ extension Event {
     case .Throw: 2
     case .Run(let event):
       switch event {
-        /// 一時的に2にしているが、800m/1500mのみ間に2つ挟まるため単純なIntでは表現できていない
-      case .eightHundredM, .thousandFiveHundredM: 2
+      case .eightHundredM, .thousandFiveHundredM: 3
       case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: 2
       }
     }

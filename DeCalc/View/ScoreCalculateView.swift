@@ -34,9 +34,12 @@ struct ScoreCalculateView: View {
                   record: $viewModel.combinedEventInfo.events[eventIndex].score,
                   isFocused: $isScoreFocused,
                   numberLength: event.event.digit,
-                  leadingUnit: event.event.leadUnit,
-                  centerUnit: event.event.centerUnit,
-                  trailingUnit: event.event.trailUnit,
+                  units: (
+                    event.event.leadUnit,
+                    event.event.centerUnit,
+                    event.event.trailUnit
+                  ),
+                  leadingUnitPoint: event.event.leadUnitPoint,
                   unitPoint: event.event.unitPoint,
                   textFieldId: event.id.hashValue,
                   onPressTextView: {

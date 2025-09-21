@@ -6,71 +6,49 @@ struct RecordTextView: View {
   @FocusState.Binding var isFocused: Focus?
 
   var numberLength: Int
-  var leadingUnit: String?
-  var centerUnit: String
-  var trailingUnit: String?
+  /// TextView内に表示する単位
+  /// ex. 1500m: ( `'`, `"`, `nil`)
+  /// ex. 100m: (`nil`, `"`, `nil`)
+  var units: (
+    leading: String?,
+    center: String,
+    trailing: String?
+  )
+  var leadingUnitPoint: Int?
   var unitPoint: Int
   var textFieldId: Int
-  /// 長距離種目かどうか
-  var isLongRunning: Bool = false
   var keyboardType: UIKeyboardType = .numberPad
   var onPressTextView: (() -> Void)?
   var scoreFilled: (() -> Void)?
 
-  // TODO: ここロジックやばいから整理
-  func getPinIndex(index: Int) -> Int {
-    // index: 今もらってきてるindex
-    // 長距離種目の場合
-    if isLongRunning {
-      if index > 5 {
-        return index - 2
-      } else if index > unitPoint {
-        return index - 1
-      } else {
-        return index
-      }
-    } else {
-      return index <= unitPoint ? index : index - 1
-    }
-  }
-
   var body: some View {
     ZStack(alignment: .center) {
       HStack(alignment: .center) {
-        ForEach(isLongRunning ? 0..<numberLength + 3 : 0..<numberLength + 2, id: \.self) { i in
-          if isLongRunning && i == 2 {
-            if let leadingUnit {
-              Text(leadingUnit)
-                .font(.system(size: 20, weight: .semibold))
-                .frame(alignment: .bottom)
-            }
-          } else if i == unitPoint {
-            Text(centerUnit)
-              .font(.system(size: 20, weight: .semibold))
-              .frame(alignment: .bottom)
-          } else if i == numberLength + 1 {
-            // 最後の場合、末尾の単位があれば表示
-            if let trailingUnit {
-              Text(trailingUnit)
-                .font(.system(size: 20, weight: .semibold))
-                .frame(alignment: .bottom)
-            }
-          } else if i != unitPoint {
-            ZStack(alignment: .center) {
-              RoundedRectangle(cornerRadius: 5)
-                .stroke(isFocused == .focused(id: textFieldId)
-                        ? Color.primaryColor
-                        : .gray, lineWidth: 2)
-                .frame(
-                  width: 40,
-                  height: 40
-                )
-              Text(getPin(at: getPinIndex(index: i)))
-                .font(.system(size: 30))
-                .fontWeight(.semibold)
-                .foregroundColor(.black)
-            }
+        ForEach(0..<numberLength, id: \.self) { index in
+          ZStack(alignment: .center) {
+            RoundedRectangle(cornerRadius: 5)
+              .stroke(isFocused == .focused(id: textFieldId)
+                      ? Color.primaryColor
+                      : .gray, lineWidth: 2)
+              .frame(
+                width: 40,
+                height: 40
+              )
+            Text(getPin(at: index))
+              .font(.system(size: 30))
+              .fontWeight(.semibold)
+              .foregroundColor(.black)
           }
+          ForEach(Array(unitsToInsert(after: index).enumerated()), id: \.offset) { entry in
+            unitLabel(entry.element)
+          }
+        }
+        // unitPointが入力桁数を超えるケースを考慮
+        if unitPoint > numberLength {
+          unitLabel(units.center)
+        }
+        if let trailingUnit = units.trailing {
+          unitLabel(trailingUnit)
         }
       }
       RecordTextField(
@@ -135,6 +113,28 @@ struct RecordTextView: View {
   }
 }
 
+private extension RecordTextView {
+  func unitsToInsert(after index: Int) -> [String] {
+    var insertions: [String] = []
+    if let leadingUnitPoint,
+       index + 1 == leadingUnitPoint,
+       let leadingUnit = units.leading {
+      insertions.append(leadingUnit)
+    }
+    if unitPoint > 0, index + 1 == unitPoint {
+      insertions.append(units.center)
+    }
+    return insertions
+  }
+
+  @ViewBuilder
+  func unitLabel(_ unit: String) -> some View {
+    Text(unit)
+      .font(.system(size: 20, weight: .semibold))
+      .frame(alignment: .bottom)
+  }
+}
+
 #Preview {
   @Previewable @State var record: String? = ""
   @FocusState var isFocused: Focus?
@@ -142,11 +142,9 @@ struct RecordTextView: View {
     record: $record,
     isFocused: $isFocused,
     numberLength: 5,
-    leadingUnit: ":",
-    centerUnit: "\"",
-    trailingUnit: nil,
-    unitPoint: 5,
-    textFieldId: 5,
-    isLongRunning: true
+    units: ("'", "\"", nil),
+    leadingUnitPoint: 1,
+    unitPoint: 3,
+    textFieldId: 5
   )
 }
