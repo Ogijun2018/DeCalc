@@ -52,6 +52,14 @@ final class ScoreCalculateViewModel: ObservableObject {
     combinedEventInfo.events[index].point = point
   }
 
+  func didTapDeleteButton() {
+    for index in combinedEventInfo.events.indices {
+      combinedEventInfo.events[index].score = nil
+      combinedEventInfo.events[index].point = 0
+      combinedEventInfo.events[index].errorText = nil
+    }
+  }
+
   init(combinedEvent: CombinedEvent) {
     self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
   }

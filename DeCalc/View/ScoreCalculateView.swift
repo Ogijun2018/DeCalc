@@ -15,6 +15,8 @@ struct ScoreCalculateView: View {
   // 現状は一つのcaseを持つenumを用いている
   @FocusState var isScoreFocused: Focus?
   @FocusState var isPointFocused: Focus?
+  /// 削除ダイアログの表示状態
+  @State private var isShowingClearAlert = false
 
   var body: some View {
     NavigationView {
@@ -101,11 +103,21 @@ struct ScoreCalculateView: View {
         )
       }
     }
-    .navigationBarItems(trailing: Button(action: {
-      print("hoge")
-    }) {
+    .navigationBarItems(trailing: Button {
+      isShowingClearAlert = true
+    } label: {
       Image(systemName: "trash")
     })
+    .alert("すべてのスコアを削除しますか？", isPresented: $isShowingClearAlert) {
+      Button("キャンセル", role: .cancel) {
+        isShowingClearAlert = false
+      }
+      Button("OK", role: .destructive) {
+        isScoreFocused = nil
+        isPointFocused = nil
+        viewModel.didTapDeleteButton()
+      }
+    }
     .tint(Color.primaryColor)
   }
 }
