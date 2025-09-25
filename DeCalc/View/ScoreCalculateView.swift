@@ -43,10 +43,8 @@ struct ScoreCalculateView: View {
                   unitPoint: event.event.unitPoint,
                   textFieldId: event.id.hashValue,
                   onPressTextView: {
-                    isScoreFocused = switch isScoreFocused {
-                    case .focused: nil
-                    case nil: .focused(id: event.id.hashValue)
-                    }
+                    let targetFocus: Focus? = .focused(id: event.id.hashValue)
+                    isScoreFocused = isScoreFocused == targetFocus ? nil : targetFocus
                   },
                   scoreFilled: {
                     viewModel.scoreFilled(index: eventIndex)
