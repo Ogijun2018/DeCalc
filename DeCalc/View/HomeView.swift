@@ -6,10 +6,8 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct HomeView: View {
-  //    @Environment(\.modelContext) private var modelContext
   @StateObject var viewModel: HomeViewModel
 
   // Animationの発火はtoggle()することでしか実現できない？
