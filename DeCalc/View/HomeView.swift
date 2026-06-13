@@ -77,15 +77,15 @@ struct HomeView: View {
                 destination: Router.Score(button.event)
               ) {
                 viewModel.selectedGender == button.gender ? EventButton(
-                  title: button.event.description,
-                  subTitle: button.event.jpName,
+                  title: button.event.localizedName,
+                  subTitle: button.event.description,
                   imagePath: button.event.heroImagePath
                 ) : nil
               }
             }
           }.padding()
         }
-      }.background(Color.primaryColor)
+      }.background(Color.backgroundColor)
     }
   }
 }

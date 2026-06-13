@@ -5,23 +5,26 @@
 //  Created by Jun Ogino on 2024/12/01.
 //
 
+import Foundation
+
 /// 混成競技の情報を持つenum
 enum CombinedEvent: Hashable, CaseIterable, CustomStringConvertible {
+    /// 英語名（ローカライズキーの基準にもなる正規名）
     var description: String {
         switch self {
         case .decathlon: "Decathlon"
-        case .heptathlon: "Heplatlon"
+        case .heptathlon: "Heptathlon"
         case .tetrathlon: "Tetrathlon"
         case .octathlon: "Octathlon"
         }
     }
-    // TODO: 多言語対応
-    var jpName: String {
+    /// ローカライズされた競技名
+    var localizedName: String {
         switch self {
-        case .decathlon: "十種競技"
-        case .heptathlon: "七種競技"
-        case .tetrathlon: "四種競技"
-        case .octathlon: "八種競技"
+        case .decathlon: String(localized: "Decathlon")
+        case .heptathlon: String(localized: "Heptathlon")
+        case .tetrathlon: String(localized: "Tetrathlon")
+        case .octathlon: String(localized: "Octathlon")
         }
     }
     var heroImagePath: String {

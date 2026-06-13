@@ -44,9 +44,9 @@ enum Event: CustomStringConvertible, Hashable {
 
     var description: String {
       switch self {
-      case .highjump: "High Jump"
-      case .longjump: "Long Jump"
-      case .paulVault: "Paul Vault"
+      case .highjump: String(localized: "High Jump")
+      case .longjump: String(localized: "Long Jump")
+      case .paulVault: String(localized: "Pole Vault")
       }
     }
 
@@ -61,9 +61,9 @@ enum Event: CustomStringConvertible, Hashable {
 
     var description: String {
       switch self {
-      case .shotput: "Shot Put"
-      case .javelinThrow: "Javelin Throw"
-      case .discusThrow: "Discus Throw"
+      case .shotput: String(localized: "Shot Put")
+      case .javelinThrow: String(localized: "Javelin Throw")
+      case .discusThrow: String(localized: "Discus Throw")
       }
     }
   }

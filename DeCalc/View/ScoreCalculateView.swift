@@ -19,7 +19,7 @@ struct ScoreCalculateView: View {
   @State private var isShowingClearAlert = false
 
   var body: some View {
-    NavigationView {
+    NavigationStack {
       ScrollView {
         ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
           GroupBox {
@@ -83,33 +83,33 @@ struct ScoreCalculateView: View {
         VStack(alignment: .leading, spacing: 4) {
           HStack() {
             Label("Total Point", systemImage: "p.circle")
-              .font(.largeTitle.weight(.semibold))
+              .font(.title2.weight(.semibold))
             Spacer()
             Text(String(viewModel.combinedEventInfo.point))
-              .font(.largeTitle.weight(.bold))
+              .font(.title2.weight(.bold))
           }
         }
         .padding()
-        .background(
-          LinearGradient(
-            colors: [
-              .green.opacity(0.3),
-              .blue.opacity(0.5)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-          )
-          .overlay(.ultraThinMaterial)
+        .glassEffect(
+          .regular.tint(.blue.opacity(0.18)),
+          in: .rect(cornerRadius: 28)
         )
+        .padding(.horizontal)
+      }
+      .navigationTitle(viewModel.combinedEventInfo.event.localizedName)
+      .navigationBarTitleDisplayMode(.automatic)
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button {
+            isShowingClearAlert = true
+          } label: {
+            Image(systemName: "trash")
+          }
+        }
       }
     }
-    .navigationBarItems(trailing: Button {
-      isShowingClearAlert = true
-    } label: {
-      Image(systemName: "trash")
-    })
-    .alert("すべてのスコアを削除しますか？", isPresented: $isShowingClearAlert) {
-      Button("キャンセル", role: .cancel) {
+    .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
+      Button("Cancel", role: .cancel) {
         isShowingClearAlert = false
       }
       Button("OK", role: .destructive) {
