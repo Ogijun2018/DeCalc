@@ -10,10 +10,6 @@ import SwiftUI
 struct HomeView: View {
   @StateObject var viewModel: HomeViewModel
 
-  // Animationの発火はtoggle()することでしか実現できない？
-  @State private var menIconBounce: Bool = false
-  @State private var womenIconBounce: Bool = false
-
   struct EventButtonInfo: Identifiable {
     var id = UUID()
     var gender: Gender
@@ -39,36 +35,47 @@ struct HomeView: View {
   var body: some View {
     NavigationStack {
       VStack {
-        HStack {
-          Button(action: {
-            viewModel.genderButtonTapped(gender: .Men)
-            menIconBounce.toggle()
-          }) {
-            Image(systemName: "figure.stand")
-              .symbolRenderingMode(.multicolor)
-              .foregroundStyle(viewModel.selectedGender == .Men ? .blue : .gray)
-              .font(.system(size: 30))
-              .symbolEffect(.bounce, value: menIconBounce)
-          }.frame(
-            maxWidth: .infinity,
-            minHeight: 30
-          ).buttonStyle(.plain)
-          Button(action: {
-            viewModel.genderButtonTapped(gender: .Women)
-            womenIconBounce.toggle()
-          }) {
-            Image(systemName: "figure.stand.dress")
-              .symbolRenderingMode(.multicolor)
-              .foregroundStyle(viewModel.selectedGender == .Women ? .red : .gray)
-              .font(.system(size: 30))
-              .symbolEffect(.bounce, value: womenIconBounce)
-          }.frame(
-            maxWidth: .infinity,
-            minHeight: 30
-          ).buttonStyle(.plain)
+        GlassEffectContainer {
+          HStack(spacing: 12) {
+            Button(action: {
+              viewModel.genderButtonTapped(gender: .Men)
+            }) {
+              Image(systemName: "figure.stand")
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(viewModel.selectedGender == .Men ? .blue : .gray)
+                .font(.system(size: 30))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .glassEffect(
+              viewModel.selectedGender == .Men
+                ? .regular.tint(.blue.opacity(0.25)).interactive()
+                : .regular.interactive(),
+              in: .capsule
+            )
+
+            Button(action: {
+              viewModel.genderButtonTapped(gender: .Women)
+            }) {
+              Image(systemName: "figure.stand.dress")
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(viewModel.selectedGender == .Women ? .red : .gray)
+                .font(.system(size: 30))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .glassEffect(
+              viewModel.selectedGender == .Women
+                ? .regular.tint(.red.opacity(0.25)).interactive()
+                : .regular.interactive(),
+              in: .capsule
+            )
+          }
+          .padding(.horizontal)
+          .padding(.top, 8)
         }
-        .padding()
-        .background(Color.secondaryColor)
 
         ScrollView {
           VStack(spacing: 0) {
@@ -85,7 +92,21 @@ struct HomeView: View {
             }
           }.padding()
         }
-      }.background(Color.backgroundColor)
+      }.background(
+        LinearGradient(
+          colors: [
+            // 明るい空色 #A6C8F2
+            Color(red: 0.651, green: 0.784, blue: 0.949),
+            // 既存のbackgroundColor #6E97E6（中間色）
+            Color.backgroundColor,
+            // やや深い青 #5E83DE
+            Color(red: 0.369, green: 0.514, blue: 0.871)
+          ],
+          startPoint: .topLeading,
+          endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+      )
     }
   }
 }

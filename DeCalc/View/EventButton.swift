@@ -50,12 +50,12 @@ struct EventButton: View {
       }
       // 画像がカード外にはみ出さないよう角丸でクリップ
       .clipShape(
-        RoundedRectangle(cornerRadius: Const.cornerRadius)
+        RoundedRectangle(cornerRadius: Const.cornerRadius, style: .continuous)
       )
       // カード背景を不透明な塗りからLiquid Glassの透明な背景に置き換え
       .glassEffect(
         .regular,
-        in: RoundedRectangle(cornerRadius: Const.cornerRadius)
+        in: RoundedRectangle(cornerRadius: Const.cornerRadius, style: .continuous)
       )
       .shadow(radius: Const.cornerRadius)
     }

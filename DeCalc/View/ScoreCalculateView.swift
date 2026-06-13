@@ -92,7 +92,7 @@ struct ScoreCalculateView: View {
         .padding()
         .glassEffect(
           .regular.tint(.blue.opacity(0.18)),
-          in: .rect(cornerRadius: 28)
+          in: RoundedRectangle(cornerRadius: 28, style: .continuous)
         )
         .padding(.horizontal)
       }
