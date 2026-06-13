@@ -52,10 +52,12 @@ struct EventButton: View {
       .clipShape(
         RoundedRectangle(cornerRadius: Const.cornerRadius, style: .continuous)
       )
-      // カード背景を不透明な塗りからLiquid Glassの透明な背景に置き換え
       .glassEffect(
-        .regular,
-        in: RoundedRectangle(cornerRadius: Const.cornerRadius, style: .continuous)
+        .regular.tint(Color.primaryColor.opacity(0.4)),
+        in: RoundedRectangle(
+          cornerRadius: Const.cornerRadius,
+          style: .continuous
+        )
       )
       .shadow(radius: Const.cornerRadius)
     }

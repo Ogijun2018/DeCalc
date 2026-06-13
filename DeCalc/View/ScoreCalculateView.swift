@@ -72,8 +72,10 @@ struct ScoreCalculateView: View {
                     Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
                       viewModel.calculateButtonDidTap(index: eventIndex)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .cornerRadius(10)
+                    .padding(10)
+                    .glassEffect(
+                      .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
+                    )
                   }
                   if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
                     Text(error)
@@ -100,7 +102,7 @@ struct ScoreCalculateView: View {
           }
           .padding()
           .glassEffect(
-            .regular.tint(.blue.opacity(0.18)),
+            .regular.tint(Color.primaryColor.opacity(0.2)).interactive(),
             in: RoundedRectangle(cornerRadius: 28, style: .continuous)
           )
           .padding(.horizontal)
