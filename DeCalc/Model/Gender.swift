@@ -8,7 +8,7 @@
 import Foundation
 
 /// 性別のenum
-enum Gender {
+enum Gender: Hashable {
     case Men
     case Women
 }
