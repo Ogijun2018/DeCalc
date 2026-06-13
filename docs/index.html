@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeCalc — Support / サポート</title>
+<style>
+  :root {
+    --accent: #1d4ed8;
+    --accent-soft: #e8efff;
+    --bg: #ffffff;
+    --fg: #1c1c1e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #6ea8ff;
+      --accent-soft: #1a2436;
+      --bg: #0f1115;
+      --fg: #f2f2f7;
+      --muted: #9aa0a6;
+      --border: #2a2e36;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+  header {
+    text-align: center;
+    padding: 40px 20px 32px;
+    background: linear-gradient(160deg, #8fbfef 0%, #1d4ed8 100%);
+    color: #fff;
+  }
+  header h1 { margin: 0 0 6px; font-size: 2.2rem; letter-spacing: -0.02em; }
+  header p { margin: 0; opacity: 0.92; font-size: 1.05rem; }
+  .lang-nav {
+    display: flex; gap: 8px; justify-content: center;
+    margin: 24px 0 8px;
+  }
+  .lang-nav a {
+    text-decoration: none; color: var(--accent);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 16px; font-size: 0.9rem; font-weight: 600;
+  }
+  h2 {
+    font-size: 1.4rem; margin: 40px 0 12px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--accent-soft);
+  }
+  h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+  ul { padding-left: 1.25em; }
+  li { margin: 4px 0; }
+  a { color: var(--accent); }
+  .card {
+    background: var(--accent-soft);
+    border-radius: 14px; padding: 16px 20px; margin: 16px 0;
+  }
+  .muted { color: var(--muted); font-size: 0.92rem; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px; }
+  code { background: var(--accent-soft); padding: 2px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DeCalc</h1>
+  <p>混成競技の得点計算 / Combined Events Score Calculator</p>
+</header>
+
+<div class="wrap">
+  <nav class="lang-nav">
+    <a href="#ja">日本語</a>
+    <a href="#en">English</a>
+  </nav>
+
+  <!-- ===================== 日本語 ===================== -->
+  <section id="ja">
+    <h2>DeCalc について</h2>
+    <p>DeCalc は、陸上競技の混成種目の得点を瞬時に計算できる iOS アプリです。記録を入力すると World Athletics（世界陸連）の公式採点方式に基づいて得点を算出し、逆に目標得点から必要な記録を逆算することもできます。</p>
+
+    <h2>対応種目</h2>
+    <ul>
+      <li>十種競技（デカスロン／男子）</li>
+      <li>八種競技（オクタスロン）</li>
+      <li>七種競技（ヘプタスロン／女子）</li>
+      <li>四種競技（男子・女子）</li>
+    </ul>
+
+    <h2>使い方</h2>
+    <h3>記録から得点を計算する</h3>
+    <ul>
+      <li>ホーム画面で男女を選び、種目を選択します。</li>
+      <li>各種目に記録（タイム・距離）を入力すると、得点が自動で表示されます。</li>
+      <li>全種目の合計得点が画面に集計されます。</li>
+    </ul>
+    <h3>得点から必要な記録を逆算する</h3>
+    <ul>
+      <li>得点欄に目標得点を入力して計算すると、その得点に必要なタイム・距離が表示されます。</li>
+    </ul>
+
+    <h2>よくある質問</h2>
+    <h3>計算結果が公式記録と少し違います</h3>
+    <p>得点は World Athletics の採点式に基づいています。端数処理の仕様上、表示はアプリ内の桁数に丸められます。</p>
+    <h3>インターネット接続は必要ですか？</h3>
+    <p>いいえ。DeCalc は完全にオフラインで動作します。</p>
+
+    <h2>お問い合わせ</h2>
+    <div class="card">
+      <p>ご質問・不具合のご報告・ご要望は、下記までお気軽にご連絡ください。</p>
+      <p>📧 <a href="mailto:ogijun.moka@gmail.com">ogijun.moka@gmail.com</a></p>
+    </div>
+
+    <p class="muted">プライバシーポリシーは <a href="privacy.html">こちら</a> をご覧ください。</p>
+  </section>
+
+  <hr>
+
+  <!-- ===================== English ===================== -->
+  <section id="en">
+    <h2>About DeCalc</h2>
+    <p>DeCalc is an iOS app that instantly calculates scores for track &amp; field combined events. Enter a performance and DeCalc converts it into points using the official World Athletics scoring formula. It also works in reverse — enter a target score to see exactly what time or distance you need.</p>
+
+    <h2>Supported Events</h2>
+    <ul>
+      <li>Decathlon (men)</li>
+      <li>Octathlon</li>
+      <li>Heptathlon (women)</li>
+      <li>Tetrathlon (men &amp; women)</li>
+    </ul>
+
+    <h2>How to Use</h2>
+    <h3>Performance → Points</h3>
+    <ul>
+      <li>Choose men's or women's events on the home screen, then pick an event.</li>
+      <li>Enter a performance (time or distance) for each discipline; the points appear automatically.</li>
+      <li>The total score across all events is summed on screen.</li>
+    </ul>
+    <h3>Points → Performance (reverse)</h3>
+    <ul>
+      <li>Enter a target score in the points field to see the time or distance required to reach it.</li>
+    </ul>
+
+    <h2>FAQ</h2>
+    <h3>The result differs slightly from an official score</h3>
+    <p>Scores follow the World Athletics scoring formula. Displayed values are rounded to the precision used in the app.</p>
+    <h3>Do I need an internet connection?</h3>
+    <p>No. DeCalc works fully offline.</p>
+
+    <h2>Contact</h2>
+    <div class="card">
+      <p>For questions, bug reports, or feature requests, feel free to reach out:</p>
+      <p>📧 <a href="mailto:ogijun.moka@gmail.com">ogijun.moka@gmail.com</a></p>
+    </div>
+
+    <p class="muted">See our <a href="privacy.html">Privacy Policy</a>.</p>
+  </section>
+</div>
+
+<footer>© 2026 Jun Ogino · DeCalc</footer>
+</body>
+</html>
