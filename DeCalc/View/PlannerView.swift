@@ -92,14 +92,30 @@ struct PlannerView: View {
     .monospacedDigit()
   }
 
+  /// 記録の目安を表示できない理由
+  private func unavailableText(_ reason: TargetPlan.Requirement.Unavailable?) -> Text {
+    switch reason {
+    case .aboveMaximum: Text("Above this event's maximum")
+    case .outOfInputRange, nil: Text("Outside the input range")
+    }
+  }
+
   /// 残り種目ごとの記録の目安
   private func requirementsSection(_ plan: TargetPlan) -> some View {
     Section {
       ForEach(plan.requirements) { requirement in
         LabeledContent {
-          Text(verbatim: requirement.record ?? "—")
-            .font(.body.weight(.semibold).monospacedDigit())
-            .foregroundStyle(.primary)
+          if let record = requirement.record {
+            Text(verbatim: record)
+              .font(.body.weight(.semibold).monospacedDigit())
+              .foregroundStyle(.primary)
+          } else {
+            // 目安を出せない場合は理由を表示する
+            unavailableText(requirement.unavailable)
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .multilineTextAlignment(.trailing)
+          }
         } label: {
           Text(requirement.name)
         }
