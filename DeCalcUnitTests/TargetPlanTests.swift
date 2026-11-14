@@ -30,15 +30,27 @@ struct TargetPlanTests {
         #expect(plan.isAchieved == false)
     }
 
-    @Test func 目安の記録は必要な得点以上になる() throws {
-        let event = CombinedEvent.heptathlon
-        let info = CombinedEventInfo(event: event, events: event.events)
-        let plan = TargetPlan(info: info, target: 5600)
-        let average = try #require(plan.averagePoint)
-        #expect(average == 800)
+    @Test(arguments: [
+        (CombinedEvent.decathlon, 3000), (.decathlon, 7000), (.decathlon, 9000),
+        (.heptathlon, 3000), (.heptathlon, 5600), (.heptathlon, 7000),
+        (.octathlon, 5000), (.tetrathlon(.Men), 2500), (.tetrathlon(.Women), 2500),
+    ])
+    func 目安の記録で必要な得点以上が取れる(event: CombinedEvent, target: Int) throws {
+        let plan = TargetPlan(info: .init(event: event, events: event.events), target: target)
         for requirement in plan.requirements {
-            #expect(requirement.record != nil)
+            guard let digits = requirement.recordDigits else { continue }
+            let score = try #require(Int(digits))
+            let point = try EventInfo(event: requirement.event).convertToPoint(score: score)
+            #expect(point >= requirement.point, "\(requirement.name): \(digits) -> \(point)")
         }
+    }
+
+    @Test func 最高得点を超える場合は理由がわかる() {
+        // 1種目あたり5000点 → どの種目も最高得点を超える
+        let tetrathlon = CombinedEvent.tetrathlon(.Men)
+        let plan = TargetPlan(info: .init(event: tetrathlon, events: tetrathlon.events), target: 20000)
+        #expect(plan.requirements.count == 4)
+        #expect(plan.requirements.allSatisfy { $0.recordDigits == nil && $0.unavailable == .aboveMaximum })
     }
 
     @Test func 目標を超えている場合は達成済みになる() {
