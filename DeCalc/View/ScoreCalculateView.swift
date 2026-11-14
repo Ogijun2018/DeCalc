@@ -28,7 +28,9 @@ struct ScoreCalculateView: View {
     NavigationStack {
       ScrollViewReader { proxy in
         ScrollView {
-          ForEach(viewModel.combinedEventInfo.daySections) { section in
+          // 識別子は「何日目か」だけにする。種目の内容まで含めると、1文字入力するたびに
+          // 別のセクションとして作り直され、入力欄のフォーカスが外れてしまう
+          ForEach(viewModel.combinedEventInfo.daySections, id: \.day) { section in
             if let day = section.day {
               daySectionHeader(day: day, events: section.events)
             }
