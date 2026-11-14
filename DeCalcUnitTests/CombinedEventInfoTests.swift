@@ -39,6 +39,16 @@ struct CombinedEventInfoTests {
         #expect(info.point == 2400)
     }
 
+    @Test func セクションを見分ける値は記録を入力しても変わらない() {
+        // 画面はdayでセクションを見分ける。入力のたびに変わると入力欄が作り直されてしまう
+        var info = CombinedEventInfo(event: .decathlon, events: CombinedEvent.decathlon.events)
+        let before = info.daySections.map(\.day)
+        info.events[0].score = "1"
+        info.events[7].point = 800
+        #expect(info.daySections.map(\.day) == before)
+        #expect(Set(before).count == before.count)
+    }
+
     @Test func セクション内の種目は全種目の配列での位置を保つ() {
         // 画面は、この位置を使って種目カードとViewModelを結びつける
         let info = CombinedEventInfo(event: .decathlon, events: CombinedEvent.decathlon.events)
