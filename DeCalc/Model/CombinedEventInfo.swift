@@ -19,13 +19,11 @@ struct CombinedEventInfo: Hashable {
     }
 
     /// 競技日ごとに種目をまとめたもの
-    struct DaySection: Identifiable, Hashable {
-        /// 何日目か（1日で完結する競技はnil）
+    struct DaySection {
+        /// 何日目か（1日で完結する競技はnil）。セクションの識別にも使う
         let day: Int?
         /// その日に行う種目（添字は全種目の配列での位置のまま）
         let events: ArraySlice<EventInfo>
-
-        var id: Int { day ?? 0 }
     }
 
     /// 1日目・2日目に分けた種目（1日で完結する競技は1セクション）
