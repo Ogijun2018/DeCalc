@@ -61,7 +61,10 @@ struct ScoreCalculateView: View {
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(viewModel.combinedEventInfo.enteredCount) of \(viewModel.combinedEventInfo.events.count) events entered")
+            .hiddenWhileEditing(isEditing)
           }
+          // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
+          .animation(.snappy, value: isEditing)
           .padding()
           .glassEffect(
             .regular.tint(Color.primaryColor.opacity(0.2)).interactive(),
@@ -287,6 +290,11 @@ struct ScoreCalculateView: View {
     }
   }
 
+  /// 記録・得点のいずれかを入力中（キーボード表示中）か
+  private var isEditing: Bool {
+    isScoreFocused != nil || isPointFocused != nil
+  }
+
   /// フォーカスを解除してソフトウェアキーボードを閉じる
   private func dismissKeyboard() {
     isScoreFocused = nil
@@ -308,6 +316,16 @@ struct ScoreCalculateView: View {
       withAnimation(.easeInOut(duration: 0.25)) {
         proxy.scrollTo(target.id, anchor: .center)
       }
+    }
+  }
+}
+
+private extension View {
+  /// 入力中は非表示にする（合計点ヘッダーの補足情報用）
+  @ViewBuilder
+  func hiddenWhileEditing(_ isEditing: Bool) -> some View {
+    if !isEditing {
+      self.transition(.opacity.combined(with: .move(edge: .top)))
     }
   }
 }
