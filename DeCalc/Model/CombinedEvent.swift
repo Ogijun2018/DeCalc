@@ -69,6 +69,17 @@ enum CombinedEvent: Hashable, CaseIterable, CustomStringConvertible {
     /// 七種競技
     case heptathlon
 
+    /// 端末内への保存時に競技を識別するキー（表示言語に依存しない）
+    var storageKey: String {
+        switch self {
+        case .decathlon: "decathlon"
+        case .octathlon: "octathlon"
+        case .heptathlon: "heptathlon"
+        case .tetrathlon(.Men): "tetrathlon.men"
+        case .tetrathlon(.Women): "tetrathlon.women"
+        }
+    }
+
     /// 1日目に行う種目数（1日で完結する競技はnil）
     var firstDayEventCount: Int? {
         switch self {

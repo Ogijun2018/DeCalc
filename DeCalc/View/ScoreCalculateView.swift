@@ -61,6 +61,7 @@ struct ScoreCalculateView: View {
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(viewModel.combinedEventInfo.enteredCount) of \(viewModel.combinedEventInfo.events.count) events entered")
+            targetRow
           }
           .padding()
           .glassEffect(
@@ -124,7 +125,7 @@ struct ScoreCalculateView: View {
         }
       }
     }
-    .sheet(item: $viewModel.sheet) { $0 }
+    .sheet(item: $viewModel.sheet, onDismiss: { viewModel.sheetDidDismiss() }) { $0 }
     .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
       Button("Cancel", role: .cancel) {
         isShowingClearAlert = false
@@ -139,6 +140,36 @@ struct ScoreCalculateView: View {
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 目標点の行。タップで目標点プランナーを開く
+  private var targetRow: some View {
+    Button {
+      viewModel.plannerButtonDidTap()
+    } label: {
+      HStack(spacing: 8) {
+        if let target = viewModel.targetPoint, let remaining = viewModel.remainingToTarget {
+          Label("Target \(target)", systemImage: "target")
+          Spacer()
+          if remaining > 0 {
+            Text("\(remaining) to go")
+              .contentTransition(.numericText(value: Double(remaining)))
+              .animation(.snappy, value: remaining)
+          } else {
+            Label("Target reached!", systemImage: "checkmark.seal.fill")
+          }
+        } else {
+          Label("Set target", systemImage: "target")
+          Spacer()
+        }
+        Image(systemName: "chevron.right")
+          .font(.caption.weight(.bold))
+      }
+      .font(.subheadline.weight(.semibold))
+      .monospacedDigit()
+      .padding(.top, 4)
+      .contentShape(Rectangle())
+    }
   }
 
   /// 競技日の見出し（何日目・入力済み種目数・小計）
