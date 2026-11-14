@@ -9,9 +9,10 @@ import SwiftUI
 /// 画像として書き出すため、Liquid Glassなどの動的な効果は使わず固定の配色で描画する
 struct ScoreCardView: View {
   private enum Const {
-    static let width: CGFloat = 360
     static let cornerRadius: CGFloat = 24
   }
+  /// 画像として書き出すときのカードの幅
+  static let width: CGFloat = 360
 
   let viewModel: ShareResultViewModel
 
@@ -46,7 +47,7 @@ struct ScoreCardView: View {
       .font(.footnote)
     }
     .padding(24)
-    .frame(width: Const.width)
+    .frame(width: Self.width)
     .foregroundStyle(Color.black)
     .background(
       RoundedRectangle(cornerRadius: Const.cornerRadius, style: .continuous)

@@ -16,9 +16,23 @@ struct ShareResultView: View {
   var body: some View {
     NavigationStack {
       ScrollView {
-        ScoreCardView(viewModel: viewModel)
-          .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
-          .padding()
+        // 書き出した画像そのものを、画面幅に収まるよう縮小して表示する
+        // （カードは固定幅のため、そのまま置くと幅の狭い端末ではみ出す）
+        Group {
+          if let cardImage {
+            cardImage
+              .resizable()
+              .scaledToFit()
+              .frame(maxWidth: ScoreCardView.width)
+              .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+              .accessibilityLabel(Text(verbatim: viewModel.summaryText))
+          } else {
+            ProgressView()
+              .padding(.top, 40)
+          }
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
       }
       .frame(maxWidth: .infinity)
       .background(Color.backgroundColor)
