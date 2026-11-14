@@ -240,7 +240,7 @@ struct ScoreCalculateView: View {
     .id(event.id)
   }
 
-  /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す
+  /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す（後ろ→先頭の順に探す）
   private func advanceFocusIfNeeded(from index: Int, proxy: ScrollViewProxy) {
     let events = viewModel.combinedEventInfo.events
     // 逆算ボタンなどキーボード入力以外で記録が埋まった場合は移動しない
@@ -249,8 +249,8 @@ struct ScoreCalculateView: View {
       let focus: Focus = .focused(id: events[next].id.hashValue)
       isScoreFocused = focus
       scrollToFocusedEvent(focus, proxy: proxy)
-    } else if viewModel.isLastEvent(index: index) {
-      // 最後の種目まで入力し終えたらキーボードを閉じる
+    } else {
+      // すべての種目の記録を入力し終えたらキーボードを閉じる
       dismissKeyboard()
     }
   }
