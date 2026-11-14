@@ -49,16 +49,14 @@ final class ScoreCalculateViewModel: ObservableObject {
     combinedEventInfo.events[index].isPointFromRecord = false
   }
 
-  /// 指定した種目より後ろにある、記録が未入力の最初の種目のインデックス
+  /// 次に入力する、記録が未入力の種目のインデックス
+  /// 指定した種目より後ろを優先し、なければ先頭から探す。すべて入力済みならnil
   func nextEmptyRecordIndex(after index: Int) -> Int? {
     let events = combinedEventInfo.events
-    guard index + 1 < events.count else { return nil }
-    return events.indices[(index + 1)...].first { (events[$0].score ?? "").isEmpty }
-  }
-
-  /// 最後の種目かどうか
-  func isLastEvent(index: Int) -> Bool {
-    index == combinedEventInfo.events.count - 1
+    let isEmpty: (Int) -> Bool = { (events[$0].score ?? "").isEmpty }
+    let later = events.indices.filter { $0 > index }
+    let earlier = events.indices.filter { $0 < index }
+    return later.first(where: isEmpty) ?? earlier.first(where: isEmpty)
   }
 
   /// フォーカスID（記録欄・得点欄のどちらでも）から種目のインデックスを求める
