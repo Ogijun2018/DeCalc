@@ -20,10 +20,25 @@ final class HelpViewModel: ObservableObject {
     let c: String
   }
 
+  /// 計算式の説明1行分の情報
+  struct FormulaRow: Identifiable {
+    let id = UUID()
+    /// 種目の種類（トラック・跳躍・投てき）
+    let title: String
+    /// 得点の計算式
+    let formula: String
+  }
+
   /// ヘルプを開いた混成競技
   let combinedEvent: CombinedEvent
   /// 混成競技に含まれる種目ごとの係数
   let coefficientRows: [CoefficientRow]
+  /// 種目の種類ごとの得点の計算式
+  let formulaRows = [
+    FormulaRow(title: String(localized: "Track events"), formula: "P = A × (B − T)^C"),
+    FormulaRow(title: String(localized: "Jumps"), formula: "P = A × (M − B)^C"),
+    FormulaRow(title: String(localized: "Throws"), formula: "P = A × (D − B)^C"),
+  ]
   /// サポートページ
   let supportURL = URL(string: "https://ogijun2018.github.io/DeCalc/")
 

@@ -48,7 +48,7 @@ struct HomeView: View {
           VStack(spacing: 0) {
             ForEach(buttons) { button in
               NavigationLink(
-                destination: Router.Score(button.event)
+                destination: RouterView(router: .Score(button.event))
               ) {
                 viewModel.selectedGender == button.gender ? EventButton(
                   title: button.event.localizedName,
