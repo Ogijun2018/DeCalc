@@ -13,37 +13,27 @@ struct ScoreChartView: View {
   }
 
   @StateObject var viewModel: ScoreChartViewModel
-  @Environment(\.dismiss) private var dismiss
 
   var body: some View {
-    NavigationStack {
-      Group {
-        if viewModel.hasData {
-          List {
-            Section(viewModel.title) {
-              chart
-                .frame(height: CGFloat(viewModel.entries.count) * Const.barHeight + 40)
-                .padding(.vertical, 8)
-            }
-            summarySection
+    Group {
+      if viewModel.hasData {
+        List {
+          Section(viewModel.title) {
+            chart
+              .frame(height: CGFloat(viewModel.entries.count) * Const.barHeight + 40)
+              .padding(.vertical, 8)
           }
-        } else {
-          ContentUnavailableView(
-            "No scores yet",
-            systemImage: "chart.bar.xaxis",
-            description: Text("Enter records to see the breakdown by event.")
-          )
+          summarySection
         }
-      }
-      .navigationTitle("Score breakdown")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Done") { dismiss() }
-        }
+      } else {
+        ContentUnavailableView(
+          "No scores yet",
+          systemImage: "chart.bar.xaxis",
+          description: Text("Enter records to see the breakdown by event.")
+        )
       }
     }
-    .tint(Color.primaryColor)
+    .sheetNavigation(title: "Score breakdown")
   }
 
   /// 種目別得点の横棒グラフ（破線は平均点）
@@ -81,7 +71,7 @@ struct ScoreChartView: View {
     Section {
       if let average = viewModel.average {
         LabeledContent("Average per event") {
-          Text("\(average) pt")
+          Text(points: average)
         }
       }
       if let best = viewModel.best {

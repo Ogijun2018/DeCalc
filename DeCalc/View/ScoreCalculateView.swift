@@ -69,10 +69,8 @@ struct ScoreCalculateView: View {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
               // グラフ: 種目別の得点内訳を表示
-              Button {
+              Button("Score breakdown", systemImage: "chart.bar.xaxis") {
                 viewModel.chartButtonDidTap()
-              } label: {
-                Label("Score breakdown", systemImage: "chart.bar.xaxis")
               }
               // シェア: 結果カードを画像・テキストで共有
               Button("Share result", systemImage: "square.and.arrow.up") {
