@@ -45,7 +45,8 @@ final class ShareResultViewModel: ObservableObject {
 
   /// テキストでシェアする内容
   var summaryText: String {
-    var lines = ["\(title) \(String(localized: "\(total) pt"))"]
+    // 桁区切りを入れないよう、得点は文字列にしてから渡す
+    var lines = ["\(title) \(String(localized: "\(String(total)) pt"))"]
     lines += rows.map { row in
       "\(row.name)  \(row.record ?? "-")  \(row.point)"
     }
