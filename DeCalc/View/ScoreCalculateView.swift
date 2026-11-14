@@ -17,6 +17,10 @@ struct ScoreCalculateView: View {
   @FocusState var isPointFocused: Focus?
   /// 削除ダイアログの表示状態
   @State private var isShowingClearAlert = false
+  /// 保存ダイアログの表示状態
+  @State private var isShowingSaveAlert = false
+  /// 保存ダイアログで入力する名前
+  @State private var saveName = ""
   /// 外部URL（App Store等）を開くための環境値
   @Environment(\.openURL) private var openURL
   /// App StoreのアプリID
@@ -48,6 +52,12 @@ struct ScoreCalculateView: View {
                 .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
                 .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
+            if let comparison = viewModel.personalBestTotalComparison {
+              HStack {
+                Spacer()
+                personalBestLabel(comparison)
+              }
+            }
             // 入力済みの種目数
             HStack(spacing: 8) {
               ProgressView(
@@ -75,6 +85,19 @@ struct ScoreCalculateView: View {
         .toolbar {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
+              // 保存: 現在の記録を端末内に保存し、自己ベストとの比較に使う
+              Button {
+                isShowingSaveAlert = true
+              } label: {
+                Label("Save scores", systemImage: "square.and.arrow.down")
+              }
+              .disabled(!viewModel.canSave)
+              Button {
+                viewModel.savedSheetsButtonDidTap()
+              } label: {
+                Label("Saved scores", systemImage: "tray.full")
+              }
+              Divider()
               // グラフ: 種目別の得点内訳を表示
               Button {
                 viewModel.chartButtonDidTap()
@@ -131,6 +154,18 @@ struct ScoreCalculateView: View {
             .accessibilityLabel("Done")
           }
         }
+        .alert("Save scores", isPresented: $isShowingSaveAlert) {
+          TextField("Name (optional)", text: $saveName)
+          Button("Cancel", role: .cancel) {
+            saveName = ""
+          }
+          Button("Save") {
+            viewModel.saveButtonDidTap(name: saveName)
+            saveName = ""
+          }
+        } message: {
+          Text("The scores are saved on this device only.")
+        }
         // 得点欄（実体のあるTextField）はフォーカスの変化を検知してスクロールする
         .onChange(of: isPointFocused) { _, newValue in
           scrollToFocusedEvent(newValue, proxy: proxy)
@@ -151,7 +186,23 @@ struct ScoreCalculateView: View {
     // 得点が確定したとき・逆算に失敗したときに触覚で知らせる
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
+    .sensoryFeedback(.success, trigger: viewModel.saveFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 自己ベストの得点と、現在の得点との差（上回っていれば緑、下回っていれば赤）
+  private func personalBestLabel(_ comparison: ScoreCalculateViewModel.PersonalBestComparison) -> some View {
+    HStack(spacing: 6) {
+      Text(verbatim: "PB \(comparison.point)")
+        .foregroundStyle(.secondary)
+      if let diff = comparison.diff, let diffText = comparison.diffText {
+        Text(verbatim: diffText)
+          .foregroundStyle(diff >= 0 ? Color.green : Color.red)
+      }
+    }
+    .font(.caption.weight(.semibold))
+    .monospacedDigit()
+    .accessibilityElement(children: .combine)
   }
 
   /// 目標点の行。タップで目標点プランナーを開く
@@ -265,6 +316,13 @@ struct ScoreCalculateView: View {
             .glassEffect(
               .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
             )
+          }
+          if let comparison = viewModel.personalBestComparison(at: eventIndex) {
+            HStack {
+              personalBestLabel(comparison)
+              Spacer()
+            }
+            .padding(.top, 2)
           }
           if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
             Text(error)
