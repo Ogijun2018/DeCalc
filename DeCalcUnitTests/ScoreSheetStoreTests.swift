@@ -57,6 +57,17 @@ struct ScoreSheetStoreTests {
         #expect(store.personalBest(for: .decathlon)?.id == best.id)
     }
 
+    @Test func 種目ごとの自己ベストは保存した記録の中の最高点になる() throws {
+        let (store, cleanUp) = try makeStore()
+        defer { cleanUp() }
+        #expect(store.personalBestEventPoints(for: .decathlon) == Array(repeating: 0, count: 10))
+        // 合計点の自己ベストは1つ目だが、2種目目の最高点は2つ目の記録
+        store.save(SavedScoreSheet(info: makeInfo(.decathlon, points: [900, 600, 800]), name: ""))
+        store.save(SavedScoreSheet(info: makeInfo(.decathlon, points: [700, 750]), name: ""))
+        let best = store.personalBestEventPoints(for: .decathlon)
+        #expect(Array(best.prefix(4)) == [900, 750, 800, 0])
+    }
+
     @Test func 記録を削除できる() throws {
         let (store, cleanUp) = try makeStore()
         defer { cleanUp() }

@@ -20,6 +20,16 @@ extension ScoreSheetStoring {
   func personalBest(for event: CombinedEvent) -> SavedScoreSheet? {
     sheets(for: event).max { $0.total < $1.total }
   }
+
+  /// 指定した混成競技の、種目ごとの自己ベスト得点（保存した記録の中でその種目の最高点）
+  /// 合計点の自己ベストとは別の試合の得点になることがある。未入力の種目は0
+  func personalBestEventPoints(for event: CombinedEvent) -> [Int] {
+    sheets(for: event).reduce(into: Array(repeating: 0, count: event.events.count)) { best, sheet in
+      for (index, entry) in sheet.entries.enumerated() where best.indices.contains(index) {
+        best[index] = max(best[index], entry.point)
+      }
+    }
+  }
 }
 
 /// UserDefaults（端末内のみ）に記録を保存するストア

@@ -191,6 +191,7 @@ struct ScoreCalculateView: View {
   }
 
   /// 自己ベストの得点と、現在の得点との差（上回っていれば緑、下回っていれば赤）
+  /// 合計欄では合計点の自己ベスト、種目カードではその種目の自己ベストと比べる
   private func personalBestLabel(_ comparison: ScoreCalculateViewModel.PersonalBestComparison) -> some View {
     HStack(spacing: 6) {
       Text(verbatim: "PB \(comparison.point)")

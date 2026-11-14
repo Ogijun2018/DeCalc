@@ -29,7 +29,13 @@ final class ScoreCalculateViewModel: ObservableObject {
   /// シートが閉じられたとき、シート側で変更された内容を読み直す
   func sheetDidDismiss() {
     targetPoint = targetStore.target(for: combinedEventInfo.event)
+    reloadPersonalBest()
+  }
+
+  /// 保存した記録から自己ベストを読み直す
+  private func reloadPersonalBest() {
     personalBest = sheetStore.personalBest(for: combinedEventInfo.event)
+    personalBestEventPoints = sheetStore.personalBestEventPoints(for: combinedEventInfo.event)
   }
 
   /// 自己ベストとの比較結果
@@ -50,6 +56,8 @@ final class ScoreCalculateViewModel: ObservableObject {
 
   /// 自己ベスト（保存した記録のうち合計点が最も高いもの）
   @Published private(set) var personalBest: SavedScoreSheet?
+  /// 種目ごとの自己ベスト得点（保存した記録の中でその種目の最高点、未入力は0）
+  @Published private(set) var personalBestEventPoints: [Int] = []
   /// 記録を保存するたびに増えるカウンタ（触覚フィードバックのトリガー）
   @Published private(set) var saveFeedbackTrigger = 0
   private let sheetStore: ScoreSheetStoring
@@ -59,12 +67,11 @@ final class ScoreCalculateViewModel: ObservableObject {
     combinedEventInfo.point > 0
   }
 
-  /// 指定した種目の、自己ベストとの比較（自己ベストがない・その種目が未入力だった場合はnil）
+  /// 指定した種目の、その種目の自己ベストとの比較（保存した記録にその種目の得点がない場合はnil）
   func personalBestComparison(at index: Int) -> PersonalBestComparison? {
-    guard let personalBest,
-          personalBest.entries.indices.contains(index),
-          personalBest.entries[index].point > 0 else { return nil }
-    let bestPoint = personalBest.entries[index].point
+    guard personalBestEventPoints.indices.contains(index),
+          personalBestEventPoints[index] > 0 else { return nil }
+    let bestPoint = personalBestEventPoints[index]
     let currentPoint = combinedEventInfo.events[index].point
     return PersonalBestComparison(
       point: bestPoint,
@@ -86,7 +93,7 @@ final class ScoreCalculateViewModel: ObservableObject {
   func saveButtonDidTap(name: String) {
     guard canSave else { return }
     sheetStore.save(SavedScoreSheet(info: combinedEventInfo, name: name))
-    personalBest = sheetStore.personalBest(for: combinedEventInfo.event)
+    reloadPersonalBest()
     saveFeedbackTrigger += 1
   }
 
@@ -225,6 +232,7 @@ final class ScoreCalculateViewModel: ObservableObject {
     self.targetPoint = targetStore.target(for: combinedEvent)
     self.sheetStore = sheetStore
     self.personalBest = sheetStore.personalBest(for: combinedEvent)
+    self.personalBestEventPoints = sheetStore.personalBestEventPoints(for: combinedEvent)
   }
 }
 
