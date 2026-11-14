@@ -26,12 +26,10 @@ struct ScoreCalculateView: View {
         ScrollView {
           ForEach(viewModel.combinedEventInfo.daySections) { section in
             if let day = section.day {
-              daySectionHeader(day: day, section: section)
+              daySectionHeader(day: day, events: section.events)
             }
-            ForEach(section.events) { event in
-              if let index = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
-                eventCard(index: index, proxy: proxy)
-              }
+            ForEach(section.events.indices, id: \.self) { index in
+              eventCard(index: index, proxy: proxy)
             }
           }
         }
@@ -48,22 +46,12 @@ struct ScoreCalculateView: View {
                 .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
                 .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
-            // 入力済みの種目数
-            HStack(spacing: 8) {
-              ProgressView(
-                value: Double(viewModel.combinedEventInfo.enteredCount),
-                total: Double(viewModel.combinedEventInfo.events.count)
-              )
-              Text(verbatim: "\(viewModel.combinedEventInfo.enteredCount)/\(viewModel.combinedEventInfo.events.count)")
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
+            // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
+            if !isEditing {
+              progressRow
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(viewModel.combinedEventInfo.enteredCount) of \(viewModel.combinedEventInfo.events.count) events entered")
-            .hiddenWhileEditing(isEditing)
           }
-          // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
           .animation(.snappy, value: isEditing)
           .padding()
           .glassEffect(
@@ -138,22 +126,37 @@ struct ScoreCalculateView: View {
     .tint(Color.primaryColor)
   }
 
+  /// 入力済みの種目数（バーと「3/10」の表示）
+  private var progressRow: some View {
+    let entered = viewModel.combinedEventInfo.events.enteredCount
+    let total = viewModel.combinedEventInfo.events.count
+    return HStack(spacing: 8) {
+      ProgressView(value: Double(entered), total: Double(total))
+      Text(verbatim: "\(entered)/\(total)")
+        .font(.caption.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(.secondary)
+    }
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("\(entered) of \(total) events entered")
+  }
+
   /// 競技日の見出し（何日目・入力済み種目数・小計）
-  private func daySectionHeader(day: Int, section: CombinedEventInfo.DaySection) -> some View {
+  private func daySectionHeader(day: Int, events: ArraySlice<EventInfo>) -> some View {
     HStack(alignment: .firstTextBaseline, spacing: 8) {
       Text("Day \(day)")
         .font(.title3.weight(.heavy))
-      Text(verbatim: "\(section.enteredCount)/\(section.events.count)")
+      Text(verbatim: "\(events.enteredCount)/\(events.count)")
         .font(.subheadline.weight(.semibold))
         .monospacedDigit()
         .foregroundStyle(.secondary)
       Spacer()
       HStack(alignment: .firstTextBaseline, spacing: 4) {
-        Text(String(section.point))
+        Text(String(events.totalPoint))
           .font(.title3.weight(.bold))
           .monospacedDigit()
-          .contentTransition(.numericText(value: Double(section.point)))
-          .animation(.snappy, value: section.point)
+          .contentTransition(.numericText(value: Double(events.totalPoint)))
+          .animation(.snappy, value: events.totalPoint)
         Text("pt")
           .font(.subheadline.weight(.semibold))
       }
@@ -308,16 +311,6 @@ struct ScoreCalculateView: View {
       withAnimation(.easeInOut(duration: 0.25)) {
         proxy.scrollTo(target.id, anchor: .center)
       }
-    }
-  }
-}
-
-private extension View {
-  /// 入力中は非表示にする（合計点ヘッダーの補足情報用）
-  @ViewBuilder
-  func hiddenWhileEditing(_ isEditing: Bool) -> some View {
-    if !isEditing {
-      self.transition(.opacity.combined(with: .move(edge: .top)))
     }
   }
 }
