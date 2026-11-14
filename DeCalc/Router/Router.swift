@@ -12,7 +12,9 @@ extension Identifiable where Self: Hashable {
     var id: Self { self }
 }
 
-enum Router: View, Hashable, Identifiable {
+/// 遷移先の画面を表す値
+/// ViewModelからも扱えるよう、View型には依存しない（画面の生成はRouterViewが行う）
+enum Router: Hashable, Identifiable {
     case Score(CombinedEvent)
     /// ヘルプ画面
     case Help(CombinedEvent)
@@ -24,15 +26,20 @@ enum Router: View, Hashable, Identifiable {
     case Chart(CombinedEventInfo)
     /// 保存した記録の一覧画面
     case SavedSheets(CombinedEvent)
+}
+
+/// Routerが表す画面
+struct RouterView: View {
+    let router: Router
 
     var body: some View {
-        switch self {
-        case .Score(let event): return AnyView(ScoreCalculateView(viewModel: .init(combinedEvent: event)))
-        case .Help(let event): return AnyView(HelpView(viewModel: .init(combinedEvent: event)))
-        case .Planner(let info): return AnyView(PlannerView(viewModel: .init(combinedEventInfo: info)))
-        case .Share(let info): return AnyView(ShareResultView(viewModel: .init(combinedEventInfo: info)))
-        case .Chart(let info): return AnyView(ScoreChartView(viewModel: .init(combinedEventInfo: info)))
-        case .SavedSheets(let event): return AnyView(SavedSheetsView(viewModel: .init(combinedEvent: event)))
+        switch router {
+        case .Score(let event): ScoreCalculateView(viewModel: .init(combinedEvent: event))
+        case .Help(let event): HelpView(viewModel: .init(combinedEvent: event))
+        case .Planner(let info): PlannerView(viewModel: .init(combinedEventInfo: info))
+        case .Share(let info): ShareResultView(viewModel: .init(combinedEventInfo: info))
+        case .Chart(let info): ScoreChartView(viewModel: .init(combinedEventInfo: info))
+        case .SavedSheets(let event): SavedSheetsView(viewModel: .init(combinedEvent: event))
         }
     }
 }

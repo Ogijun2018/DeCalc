@@ -67,7 +67,7 @@ struct SavedSheetsView: View {
           .foregroundStyle(.yellow)
           .accessibilityLabel("Personal best")
       }
-      Text("\(sheet.total) pt")
+      Text(points: sheet.total)
         .font(.headline.monospacedDigit())
     }
   }
@@ -83,7 +83,7 @@ struct SavedSheetDetailView: View {
     List {
       Section {
         LabeledContent("Total Point") {
-          Text("\(total) pt")
+          Text(points: total)
             .font(.headline.monospacedDigit())
             .foregroundStyle(.primary)
         }
