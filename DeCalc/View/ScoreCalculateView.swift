@@ -75,6 +75,12 @@ struct ScoreCalculateView: View {
         .toolbar {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
+              // シェア: 結果カードを画像・テキストで共有
+              Button {
+                viewModel.shareButtonDidTap()
+              } label: {
+                Label("Share result", systemImage: "square.and.arrow.up")
+              }
               // ヘルプ: 入力方法と計算式の説明をシートで表示
               Button {
                 viewModel.helpButtonDidTap()

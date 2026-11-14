@@ -31,6 +31,11 @@ final class ScoreCalculateViewModel: ObservableObject {
     targetPoint = targetStore.target(for: combinedEventInfo.event)
   }
 
+  /// シェアボタンをタップしたとき
+  func shareButtonDidTap() {
+    sheet = .Share(combinedEventInfo)
+  }
+
   /// ヘルプボタンをタップしたとき
   func helpButtonDidTap() {
     sheet = .Help(combinedEventInfo.event)

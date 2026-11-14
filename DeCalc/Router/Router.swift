@@ -18,12 +18,15 @@ enum Router: View, Hashable, Identifiable {
     case Help(CombinedEvent)
     /// 目標点プランナー画面
     case Planner(CombinedEventInfo)
+    /// 結果のシェア画面
+    case Share(CombinedEventInfo)
 
     var body: some View {
         switch self {
         case .Score(let event): return AnyView(ScoreCalculateView(viewModel: .init(combinedEvent: event)))
         case .Help(let event): return AnyView(HelpView(viewModel: .init(combinedEvent: event)))
         case .Planner(let info): return AnyView(PlannerView(viewModel: .init(combinedEventInfo: info)))
+        case .Share(let info): return AnyView(ShareResultView(viewModel: .init(combinedEventInfo: info)))
         }
     }
 }
