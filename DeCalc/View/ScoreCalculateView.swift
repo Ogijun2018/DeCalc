@@ -24,8 +24,8 @@ struct ScoreCalculateView: View {
     NavigationStack {
       ScrollViewReader { proxy in
         ScrollView {
-          ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
-            eventCard(event, proxy: proxy)
+          ForEach(viewModel.combinedEventInfo.events.indices, id: \.self) { index in
+            eventCard(index: index, proxy: proxy)
           }
         }
         .safeAreaInset(edge: .top) {
@@ -116,72 +116,70 @@ struct ScoreCalculateView: View {
   }
 
   /// 1種目分の入力カード（記録・得点・逆算ボタン）
-  @ViewBuilder
-  private func eventCard(_ event: EventInfo, proxy: ScrollViewProxy) -> some View {
-    GroupBox {
+  private func eventCard(index: Int, proxy: ScrollViewProxy) -> some View {
+    let event = viewModel.combinedEventInfo.events[index]
+    return GroupBox {
       VStack(spacing: 5) {
         HStack {
           Text(event.event.description)
             .font(.system(size: 25, weight: .heavy))
           Spacer()
         }
-        if let eventIndex = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
-          RecordTextView(
-            record: $viewModel.combinedEventInfo.events[eventIndex].score,
-            isFocused: $isScoreFocused,
-            numberLength: event.event.digit,
-            units: (
-              event.event.leadUnit,
-              event.event.centerUnit,
-              event.event.trailUnit
+        RecordTextView(
+          // 記録の変更はViewModelに伝え、得点の計算と消去はViewModelで行う
+          record: Binding(
+            get: { viewModel.combinedEventInfo.events[index].score },
+            set: { viewModel.recordDidChange(index: index, record: $0) }
+          ),
+          isFocused: $isScoreFocused,
+          numberLength: event.event.digit,
+          units: (
+            event.event.leadUnit,
+            event.event.centerUnit,
+            event.event.trailUnit
+          ),
+          leadingUnitPoint: event.event.leadUnitPoint,
+          unitPoint: event.event.unitPoint,
+          textFieldId: event.id.hashValue,
+          onPressTextView: {
+            let targetFocus: Focus? = .focused(id: event.id.hashValue)
+            let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
+            isScoreFocused = newFocus
+            // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
+            // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
+            scrollToFocusedEvent(newFocus, proxy: proxy)
+          },
+          scoreFilled: {
+            advanceFocusIfNeeded(from: index, proxy: proxy)
+          }
+        )
+        HStack(spacing: 10) {
+          Image(systemName: "p.circle")
+            .font(.system(size: 25))
+          ScoreTextView(
+            // 手で編集した得点は記録と連動させないため、ViewModel経由で書き込む
+            point: Binding(
+              get: { viewModel.combinedEventInfo.events[index].point },
+              set: { viewModel.pointDidEdit(index: index, point: $0) }
             ),
-            leadingUnitPoint: event.event.leadUnitPoint,
-            unitPoint: event.event.unitPoint,
-            textFieldId: event.id.hashValue,
-            onPressTextView: {
-              let targetFocus: Focus? = .focused(id: event.id.hashValue)
-              let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
-              isScoreFocused = newFocus
-              // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
-              // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
-              scrollToFocusedEvent(newFocus, proxy: proxy)
-            },
-            scoreFilled: {
-              viewModel.scoreFilled(index: eventIndex)
-              advanceFocusIfNeeded(from: eventIndex, proxy: proxy)
-            },
-            recordIncomplete: {
-              viewModel.recordBecameIncomplete(index: eventIndex)
-            }
+            isFocused: $isPointFocused,
+            textFieldId: event.idForScore.hashValue
           )
-          HStack(spacing: 10) {
-            Image(systemName: "p.circle")
-              .font(.system(size: 25))
-            ScoreTextView(
-              // 手で編集した得点は記録と連動させないため、ViewModel経由で書き込む
-              point: Binding(
-                get: { viewModel.combinedEventInfo.events[eventIndex].point },
-                set: { viewModel.pointDidEdit(index: eventIndex, point: $0) }
-              ),
-              isFocused: $isPointFocused,
-              textFieldId: event.idForScore.hashValue
-            )
-            Text("pt")
-              .font(.system(size: 20, weight: .semibold))
-            Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
-              viewModel.calculateButtonDidTap(index: eventIndex)
-            }
-            .padding(10)
-            .glassEffect(
-              .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
-            )
+          Text("pt")
+            .font(.system(size: 20, weight: .semibold))
+          Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
+            viewModel.calculateButtonDidTap(index: index)
           }
-          if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
-            Text(error)
-              .font(.system(size: 11))
-              .foregroundStyle(.red)
-              .padding(.top, 5)
-          }
+          .padding(10)
+          .glassEffect(
+            .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
+          )
+        }
+        if let error = event.errorText {
+          Text(error)
+            .font(.system(size: 11))
+            .foregroundStyle(.red)
+            .padding(.top, 5)
         }
       }
     }
