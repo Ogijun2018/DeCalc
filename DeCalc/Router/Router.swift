@@ -20,6 +20,8 @@ enum Router: View, Hashable, Identifiable {
     case Planner(CombinedEventInfo)
     /// 結果のシェア画面
     case Share(CombinedEventInfo)
+    /// 得点内訳グラフ画面
+    case Chart(CombinedEventInfo)
 
     var body: some View {
         switch self {
@@ -27,6 +29,7 @@ enum Router: View, Hashable, Identifiable {
         case .Help(let event): return AnyView(HelpView(viewModel: .init(combinedEvent: event)))
         case .Planner(let info): return AnyView(PlannerView(viewModel: .init(combinedEventInfo: info)))
         case .Share(let info): return AnyView(ShareResultView(viewModel: .init(combinedEventInfo: info)))
+        case .Chart(let info): return AnyView(ScoreChartView(viewModel: .init(combinedEventInfo: info)))
         }
     }
 }

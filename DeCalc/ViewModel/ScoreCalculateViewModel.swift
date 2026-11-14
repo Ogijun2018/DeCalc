@@ -36,6 +36,11 @@ final class ScoreCalculateViewModel: ObservableObject {
     sheet = .Share(combinedEventInfo)
   }
 
+  /// グラフボタンをタップしたとき
+  func chartButtonDidTap() {
+    sheet = .Chart(combinedEventInfo)
+  }
+
   /// ヘルプボタンをタップしたとき
   func helpButtonDidTap() {
     sheet = .Help(combinedEventInfo.event)
