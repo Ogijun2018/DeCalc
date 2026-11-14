@@ -26,8 +26,13 @@ struct ScoreCalculateView: View {
     NavigationStack {
       ScrollViewReader { proxy in
         ScrollView {
-          ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
-            eventCard(event, proxy: proxy)
+          ForEach(viewModel.combinedEventInfo.daySections) { section in
+            if let day = section.day {
+              daySectionHeader(day: day, section: section)
+            }
+            ForEach(section.events) { event in
+              eventCard(event, proxy: proxy)
+            }
           }
         }
         .safeAreaInset(edge: .top) {
@@ -43,6 +48,19 @@ struct ScoreCalculateView: View {
                 .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
                 .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
+            // 入力済みの種目数
+            HStack(spacing: 8) {
+              ProgressView(
+                value: Double(viewModel.combinedEventInfo.enteredCount),
+                total: Double(viewModel.combinedEventInfo.events.count)
+              )
+              Text(verbatim: "\(viewModel.combinedEventInfo.enteredCount)/\(viewModel.combinedEventInfo.events.count)")
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(viewModel.combinedEventInfo.enteredCount) of \(viewModel.combinedEventInfo.events.count) events entered")
           }
           .padding()
           .glassEffect(
@@ -121,6 +139,31 @@ struct ScoreCalculateView: View {
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 競技日の見出し（何日目・入力済み種目数・小計）
+  private func daySectionHeader(day: Int, section: CombinedEventInfo.DaySection) -> some View {
+    HStack(alignment: .firstTextBaseline, spacing: 8) {
+      Text("Day \(day)")
+        .font(.title3.weight(.heavy))
+      Text(verbatim: "\(section.enteredCount)/\(section.events.count)")
+        .font(.subheadline.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(.secondary)
+      Spacer()
+      HStack(alignment: .firstTextBaseline, spacing: 4) {
+        Text(String(section.point))
+          .font(.title3.weight(.bold))
+          .monospacedDigit()
+          .contentTransition(.numericText(value: Double(section.point)))
+          .animation(.snappy, value: section.point)
+        Text("pt")
+          .font(.subheadline.weight(.semibold))
+      }
+    }
+    .padding(.horizontal, 24)
+    .padding(.top, 12)
+    .accessibilityElement(children: .combine)
   }
 
   /// 1種目分の入力カード（記録・得点・逆算ボタン）
