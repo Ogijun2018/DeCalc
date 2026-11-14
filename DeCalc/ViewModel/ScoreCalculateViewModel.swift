@@ -5,7 +5,7 @@
 //  Created by Jun Ogino on 2024/11/29.
 //
 
-import SwiftUI
+import Foundation
 
 final class ScoreCalculateViewModel: ObservableObject {
   @Published var combinedEventInfo: CombinedEventInfo
@@ -36,6 +36,14 @@ final class ScoreCalculateViewModel: ObservableObject {
     sheet = .Help(combinedEventInfo.event)
   }
 
+  /// App StoreのアプリID
+  private static let appStoreID = "6779939129"
+
+  /// App Storeのレビュー投稿画面のURL
+  var reviewURL: URL? {
+    URL(string: "https://apps.apple.com/app/id\(Self.appStoreID)?action=write-review")
+  }
+
   /// 記録のTextViewをタップしたときに
   func onPressRecordTextView(id: Int) {
   }
@@ -45,6 +53,21 @@ final class ScoreCalculateViewModel: ObservableObject {
   /// 逆算に失敗するたびに増えるカウンタ（触覚フィードバックのトリガー）
   @Published private(set) var errorFeedbackTrigger = 0
 
+  /// 記録欄の入力が変わったとき
+  /// 桁がそろえば得点を計算し、欠けたら記録から計算した得点が残らないよう消す
+  func recordDidChange(index: Int, record: String?) {
+    // 同じ値の書き戻しでは何もしない
+    guard combinedEventInfo.events[index].score != record else { return }
+    combinedEventInfo.events[index].score = record
+    if (record ?? "").count >= combinedEventInfo.events[index].event.digit {
+      scoreFilled(index: index)
+    } else if combinedEventInfo.events[index].isPointFromRecord {
+      combinedEventInfo.events[index].point = 0
+      combinedEventInfo.events[index].isPointFromRecord = false
+    }
+  }
+
+  /// 入力済みの記録から得点を計算する（計算できない記録は0点）
   func scoreFilled(index: Int) {
     let eventInfo = combinedEventInfo.events[index]
     let score = eventInfo.score
@@ -59,13 +82,6 @@ final class ScoreCalculateViewModel: ObservableObject {
       combinedEventInfo.events[index].point = 0
     }
     combinedEventInfo.events[index].isPointFromRecord = true
-  }
-
-  /// 記録が桁数に満たなくなったとき、記録から計算した得点が残らないよう消す
-  func recordBecameIncomplete(index: Int) {
-    guard combinedEventInfo.events[index].isPointFromRecord else { return }
-    combinedEventInfo.events[index].point = 0
-    combinedEventInfo.events[index].isPointFromRecord = false
   }
 
   /// 次に入力する、記録が未入力の種目のインデックス
@@ -93,39 +109,41 @@ final class ScoreCalculateViewModel: ObservableObject {
 
   func calculateButtonDidTap(index: Int) {
     let eventInfo = combinedEventInfo.events[index]
-    let point = eventInfo.point
     // ここからは入力された得点が基準になる
     combinedEventInfo.events[index].isPointFromRecord = false
     do {
-      combinedEventInfo.events[index].errorText = nil
       // 計算後の記録の桁数がdigitに満たない場合は0埋めする
       // ex. 100m 1100pt → 09"98
       combinedEventInfo.events[index].score = try String(
         format: "%0\(eventInfo.event.digit)d",
-        eventInfo.convertToScore(point: point)
+        eventInfo.convertToScore(point: eventInfo.point)
       )
+      combinedEventInfo.events[index].errorText = nil
+      // 表示する得点を、逆算した記録の実際の得点にそろえる
+      scoreFilled(index: index)
     } catch EventInfo.CalculationError.overPoint {
-      combinedEventInfo.events[index].errorText = String(localized: "Please enter a score of \(eventInfo.maxPoint) or less")
-      combinedEventInfo.events[index].score = ""
-      errorFeedbackTrigger += 1
-    } catch EventInfo.CalculationError.invalidResult {
-      combinedEventInfo.events[index].errorText = String(localized: "Invalid input")
-      combinedEventInfo.events[index].score = ""
-      errorFeedbackTrigger += 1
+      // 整数をそのまま埋め込むと「4,753」と桁区切りが入るため、文字列にしてから渡す
+      showCalculationError(
+        String(localized: "Please enter a score of \(String(eventInfo.maxPoint)) or less"),
+        index: index
+      )
     } catch {
-      combinedEventInfo.events[index].errorText = String(localized: "Invalid input")
-      combinedEventInfo.events[index].score = ""
-      errorFeedbackTrigger += 1
+      showCalculationError(String(localized: "Invalid input"), index: index)
     }
   }
 
-  func didCompletePoint(index: Int, point: Int) {
-    combinedEventInfo.events[index].point = point
+  /// 得点から記録を逆算できなかったとき、エラーを表示して記録を空にする
+  private func showCalculationError(_ message: String, index: Int) {
+    combinedEventInfo.events[index].errorText = message
+    combinedEventInfo.events[index].score = ""
+    errorFeedbackTrigger += 1
   }
 
   /// 得点欄を手で編集したとき
   /// 手入力の得点は、記録を消しても連動して消さない
   func pointDidEdit(index: Int, point: Int) {
+    // 同じ値の書き戻し（フォーカスの移動時など）は手入力として扱わない
+    guard combinedEventInfo.events[index].point != point else { return }
     combinedEventInfo.events[index].point = point
     combinedEventInfo.events[index].isPointFromRecord = false
   }
@@ -143,60 +161,5 @@ final class ScoreCalculateViewModel: ObservableObject {
     self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
     self.targetStore = targetStore
     self.targetPoint = targetStore.target(for: combinedEvent)
-  }
-}
-
-extension Event {
-  /// 記録入力時の桁数
-  var digit: Int {
-    switch self {
-    case .Run(let event):
-      switch event {
-      case .eightHundredM, .thousandFiveHundredM: return 5
-      case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: return 4
-      }
-    case .Jump: return 3
-    case .Throw: return 4
-    }
-  }
-  /// 単位1
-  var leadUnit: String? {
-    switch self {
-    case .Run(.eightHundredM), .Run(.thousandFiveHundredM): "'"
-    default: nil
-    }
-  }
-  /// 単位2
-  var centerUnit: String {
-    switch self {
-    case .Run: "\""
-    case .Jump, .Throw: "m"
-    }
-  }
-  /// 単位3
-  var trailUnit: String? {
-    switch self {
-    case .Run: nil
-    case .Jump, .Throw: "cm"
-    }
-  }
-  /// leadingUnitを差し込む桁数（recordの左からの桁数）
-  var leadUnitPoint: Int? {
-    switch self {
-    case .Run(.eightHundredM), .Run(.thousandFiveHundredM): 1
-    default: nil
-    }
-  }
-  /// 単位をどこで区切るか
-  var unitPoint: Int {
-    switch self {
-    case .Jump: 1
-    case .Throw: 2
-    case .Run(let event):
-      switch event {
-      case .eightHundredM, .thousandFiveHundredM: 3
-      case .hundredM, .fourHundredM, .twoHundredM, .hundredMHurdles, .hundredTenMHurdles: 2
-      }
-    }
   }
 }

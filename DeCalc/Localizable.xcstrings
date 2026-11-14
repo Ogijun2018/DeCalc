@@ -1543,48 +1543,48 @@
         }
       }
     },
-    "Please enter a score of %lld or less" : {
+    "Please enter a score of %@ or less" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitte gib eine Punktzahl von %lld oder weniger ein"
+            "value" : "Bitte gib eine Punktzahl von %@ oder weniger ein"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introduce una puntuación de %lld o menos"
+            "value" : "Introduce una puntuación de %@ o menos"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veuillez saisir un score de %lld ou moins"
+            "value" : "Veuillez saisir un score de %@ ou moins"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inserisci un punteggio di %lld o inferiore"
+            "value" : "Inserisci un punteggio di %@ o inferiore"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld点以下を入力してください"
+            "value" : "%@点以下を入力してください"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld점 이하를 입력하세요"
+            "value" : "%@점 이하를 입력하세요"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请输入不超过 %lld 的分数"
+            "value" : "请输入不超过 %@ 的分数"
           }
         }
       }

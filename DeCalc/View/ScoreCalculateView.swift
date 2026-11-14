@@ -19,8 +19,6 @@ struct ScoreCalculateView: View {
   @State private var isShowingClearAlert = false
   /// 外部URL（App Store等）を開くための環境値
   @Environment(\.openURL) private var openURL
-  /// App StoreのアプリID
-  private static let appStoreID = "6779939129"
 
   var body: some View {
     NavigationStack {
@@ -28,10 +26,10 @@ struct ScoreCalculateView: View {
         ScrollView {
           ForEach(viewModel.combinedEventInfo.daySections) { section in
             if let day = section.day {
-              daySectionHeader(day: day, section: section)
+              daySectionHeader(day: day, events: section.events)
             }
-            ForEach(section.events) { event in
-              eventCard(event, proxy: proxy)
+            ForEach(section.events.indices, id: \.self) { index in
+              eventCard(index: index, proxy: proxy)
             }
           }
         }
@@ -48,24 +46,15 @@ struct ScoreCalculateView: View {
                 .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
                 .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
-            // 入力済みの種目数
-            HStack(spacing: 8) {
-              ProgressView(
-                value: Double(viewModel.combinedEventInfo.enteredCount),
-                total: Double(viewModel.combinedEventInfo.events.count)
-              )
-              Text(verbatim: "\(viewModel.combinedEventInfo.enteredCount)/\(viewModel.combinedEventInfo.events.count)")
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
+            // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
+            if !isEditing {
+              Group {
+                progressRow
+                targetRow
+              }
+              .transition(.opacity.combined(with: .move(edge: .top)))
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(viewModel.combinedEventInfo.enteredCount) of \(viewModel.combinedEventInfo.events.count) events entered")
-            .hiddenWhileEditing(isEditing)
-            targetRow
-              .hiddenWhileEditing(isEditing)
           }
-          // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
           .animation(.snappy, value: isEditing)
           .padding()
           .glassEffect(
@@ -80,24 +69,18 @@ struct ScoreCalculateView: View {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
               // ヘルプ: 入力方法と計算式の説明をシートで表示
-              Button {
+              Button("Help", systemImage: "questionmark.circle") {
                 viewModel.helpButtonDidTap()
-              } label: {
-                Label("Help", systemImage: "questionmark.circle")
               }
               // 記録全削除: 既存のゴミ箱と同じ挙動（確認アラートを表示）
-              Button(role: .destructive) {
+              Button("Delete all scores", systemImage: "trash", role: .destructive) {
                 isShowingClearAlert = true
-              } label: {
-                Label("Delete all scores", systemImage: "trash")
               }
               // レビュー: App Storeのレビュー画面へ遷移
-              Button {
-                if let url = URL(string: "https://apps.apple.com/app/id\(Self.appStoreID)?action=write-review") {
+              Button("Review", systemImage: "star") {
+                if let url = viewModel.reviewURL {
                   openURL(url)
                 }
-              } label: {
-                Label("Review", systemImage: "star")
               }
             } label: {
               Image(systemName: "ellipsis")
@@ -129,7 +112,7 @@ struct ScoreCalculateView: View {
         }
       }
     }
-    .sheet(item: $viewModel.sheet, onDismiss: { viewModel.sheetDidDismiss() }) { $0 }
+    .sheet(item: $viewModel.sheet, onDismiss: { viewModel.sheetDidDismiss() }) { RouterView(router: $0) }
     .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
       Button("Cancel", role: .cancel) {
         isShowingClearAlert = false
@@ -144,6 +127,21 @@ struct ScoreCalculateView: View {
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 入力済みの種目数（バーと「3/10」の表示）
+  private var progressRow: some View {
+    let entered = viewModel.combinedEventInfo.events.enteredCount
+    let total = viewModel.combinedEventInfo.events.count
+    return HStack(spacing: 8) {
+      ProgressView(value: Double(entered), total: Double(total))
+      Text(verbatim: "\(entered)/\(total)")
+        .font(.caption.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(.secondary)
+    }
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("\(entered) of \(total) events entered")
   }
 
   /// 目標点の行。タップで目標点プランナーを開く
@@ -177,21 +175,21 @@ struct ScoreCalculateView: View {
   }
 
   /// 競技日の見出し（何日目・入力済み種目数・小計）
-  private func daySectionHeader(day: Int, section: CombinedEventInfo.DaySection) -> some View {
+  private func daySectionHeader(day: Int, events: ArraySlice<EventInfo>) -> some View {
     HStack(alignment: .firstTextBaseline, spacing: 8) {
       Text("Day \(day)")
         .font(.title3.weight(.heavy))
-      Text(verbatim: "\(section.enteredCount)/\(section.events.count)")
+      Text(verbatim: "\(events.enteredCount)/\(events.count)")
         .font(.subheadline.weight(.semibold))
         .monospacedDigit()
         .foregroundStyle(.secondary)
       Spacer()
       HStack(alignment: .firstTextBaseline, spacing: 4) {
-        Text(String(section.point))
+        Text(String(events.totalPoint))
           .font(.title3.weight(.bold))
           .monospacedDigit()
-          .contentTransition(.numericText(value: Double(section.point)))
-          .animation(.snappy, value: section.point)
+          .contentTransition(.numericText(value: Double(events.totalPoint)))
+          .animation(.snappy, value: events.totalPoint)
         Text("pt")
           .font(.subheadline.weight(.semibold))
       }
@@ -202,72 +200,70 @@ struct ScoreCalculateView: View {
   }
 
   /// 1種目分の入力カード（記録・得点・逆算ボタン）
-  @ViewBuilder
-  private func eventCard(_ event: EventInfo, proxy: ScrollViewProxy) -> some View {
-    GroupBox {
+  private func eventCard(index: Int, proxy: ScrollViewProxy) -> some View {
+    let event = viewModel.combinedEventInfo.events[index]
+    return GroupBox {
       VStack(spacing: 5) {
         HStack {
           Text(event.event.description)
             .font(.system(size: 25, weight: .heavy))
           Spacer()
         }
-        if let eventIndex = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
-          RecordTextView(
-            record: $viewModel.combinedEventInfo.events[eventIndex].score,
-            isFocused: $isScoreFocused,
-            numberLength: event.event.digit,
-            units: (
-              event.event.leadUnit,
-              event.event.centerUnit,
-              event.event.trailUnit
+        RecordTextView(
+          // 記録の変更はViewModelに伝え、得点の計算と消去はViewModelで行う
+          record: Binding(
+            get: { viewModel.combinedEventInfo.events[index].score },
+            set: { viewModel.recordDidChange(index: index, record: $0) }
+          ),
+          isFocused: $isScoreFocused,
+          numberLength: event.event.digit,
+          units: (
+            event.event.leadUnit,
+            event.event.centerUnit,
+            event.event.trailUnit
+          ),
+          leadingUnitPoint: event.event.leadUnitPoint,
+          unitPoint: event.event.unitPoint,
+          textFieldId: event.id.hashValue,
+          onPressTextView: {
+            let targetFocus: Focus? = .focused(id: event.id.hashValue)
+            let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
+            isScoreFocused = newFocus
+            // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
+            // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
+            scrollToFocusedEvent(newFocus, proxy: proxy)
+          },
+          scoreFilled: {
+            advanceFocusIfNeeded(from: index, proxy: proxy)
+          }
+        )
+        HStack(spacing: 10) {
+          Image(systemName: "p.circle")
+            .font(.system(size: 25))
+          ScoreTextView(
+            // 手で編集した得点は記録と連動させないため、ViewModel経由で書き込む
+            point: Binding(
+              get: { viewModel.combinedEventInfo.events[index].point },
+              set: { viewModel.pointDidEdit(index: index, point: $0) }
             ),
-            leadingUnitPoint: event.event.leadUnitPoint,
-            unitPoint: event.event.unitPoint,
-            textFieldId: event.id.hashValue,
-            onPressTextView: {
-              let targetFocus: Focus? = .focused(id: event.id.hashValue)
-              let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
-              isScoreFocused = newFocus
-              // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
-              // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
-              scrollToFocusedEvent(newFocus, proxy: proxy)
-            },
-            scoreFilled: {
-              viewModel.scoreFilled(index: eventIndex)
-              advanceFocusIfNeeded(from: eventIndex, proxy: proxy)
-            },
-            recordIncomplete: {
-              viewModel.recordBecameIncomplete(index: eventIndex)
-            }
+            isFocused: $isPointFocused,
+            textFieldId: event.idForScore.hashValue
           )
-          HStack(spacing: 10) {
-            Image(systemName: "p.circle")
-              .font(.system(size: 25))
-            ScoreTextView(
-              // 手で編集した得点は記録と連動させないため、ViewModel経由で書き込む
-              point: Binding(
-                get: { viewModel.combinedEventInfo.events[eventIndex].point },
-                set: { viewModel.pointDidEdit(index: eventIndex, point: $0) }
-              ),
-              isFocused: $isPointFocused,
-              textFieldId: event.idForScore.hashValue
-            )
-            Text("pt")
-              .font(.system(size: 20, weight: .semibold))
-            Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
-              viewModel.calculateButtonDidTap(index: eventIndex)
-            }
-            .padding(10)
-            .glassEffect(
-              .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
-            )
+          Text("pt")
+            .font(.system(size: 20, weight: .semibold))
+          Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
+            viewModel.calculateButtonDidTap(index: index)
           }
-          if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
-            Text(error)
-              .font(.system(size: 11))
-              .foregroundStyle(.red)
-              .padding(.top, 5)
-          }
+          .padding(10)
+          .glassEffect(
+            .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
+          )
+        }
+        if let error = event.errorText {
+          Text(error)
+            .font(.system(size: 11))
+            .foregroundStyle(.red)
+            .padding(.top, 5)
         }
       }
     }
@@ -348,16 +344,6 @@ struct ScoreCalculateView: View {
       withAnimation(.easeInOut(duration: 0.25)) {
         proxy.scrollTo(target.id, anchor: .center)
       }
-    }
-  }
-}
-
-private extension View {
-  /// 入力中は非表示にする（合計点ヘッダーの補足情報用）
-  @ViewBuilder
-  func hiddenWhileEditing(_ isEditing: Bool) -> some View {
-    if !isEditing {
-      self.transition(.opacity.combined(with: .move(edge: .top)))
     }
   }
 }
