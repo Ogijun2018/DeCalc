@@ -52,6 +52,13 @@ struct EventInfo: Identifiable, Hashable {
         // TODO: スコア0未満の場合のerror
         throw CalculationError.invalidResult
       }
+      // 分の単位がない種目（ss"cc の4桁入力）は、60秒を超えても秒のまま表す
+      // ex. 400m 63.60秒 → 6360（分に繰り上げると 1'03"60 → 10360 となり桁があふれる）
+      if event.leadUnit == nil {
+        let sec = floor(score)
+        let mSec = floor((score - sec) * 100)
+        return Int(sec * 100 + mSec)
+      }
       return convertScoreToInt(seconds: score)
     case .Jump:
       if try convertToPoint(score: 999) < point {
