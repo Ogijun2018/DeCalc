@@ -106,6 +106,13 @@ final class ScoreCalculateViewModel: ObservableObject {
     combinedEventInfo.events[index].point = point
   }
 
+  /// 得点欄を手で編集したとき
+  /// 手入力の得点は、記録を消しても連動して消さない
+  func pointDidEdit(index: Int, point: Int) {
+    combinedEventInfo.events[index].point = point
+    combinedEventInfo.events[index].isPointFromRecord = false
+  }
+
   func didTapDeleteButton() {
     for index in combinedEventInfo.events.indices {
       combinedEventInfo.events[index].score = nil
