@@ -9,6 +9,13 @@ import SwiftUI
 
 final class ScoreCalculateViewModel: ObservableObject {
   @Published var combinedEventInfo: CombinedEventInfo
+  /// シートとして表示する画面（nilの場合は非表示）
+  @Published var sheet: Router?
+
+  /// ヘルプボタンをタップしたとき
+  func helpButtonDidTap() {
+    sheet = .Help(combinedEventInfo.event)
+  }
 
   /// 記録のTextViewをタップしたときに
   func onPressRecordTextView(id: Int) {

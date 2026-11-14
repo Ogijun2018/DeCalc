@@ -19,8 +19,8 @@ struct ScoreCalculateView: View {
   @State private var isShowingClearAlert = false
   /// 外部URL（App Store等）を開くための環境値
   @Environment(\.openURL) private var openURL
-  /// TODO: App Store ConnectのアプリIDに置き換える
-  private static let appStoreID = "0000000000"
+  /// App StoreのアプリID
+  private static let appStoreID = "6779939129"
 
   var body: some View {
     NavigationStack {
@@ -112,8 +112,9 @@ struct ScoreCalculateView: View {
         .toolbar {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
-              // ヘルプ: 一旦何もしない
+              // ヘルプ: 入力方法と計算式の説明をシートで表示
               Button {
+                viewModel.helpButtonDidTap()
               } label: {
                 Label("Help", systemImage: "questionmark.circle")
               }
@@ -149,6 +150,7 @@ struct ScoreCalculateView: View {
         }
       }
     }
+    .sheet(item: $viewModel.sheet) { $0 }
     .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
       Button("Cancel", role: .cancel) {
         isShowingClearAlert = false
