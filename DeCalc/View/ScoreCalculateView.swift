@@ -79,16 +79,12 @@ struct ScoreCalculateView: View {
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
               // 保存: 現在の記録を端末内に保存し、自己ベストとの比較に使う
-              Button {
+              Button("Save scores", systemImage: "square.and.arrow.down") {
                 isShowingSaveAlert = true
-              } label: {
-                Label("Save scores", systemImage: "square.and.arrow.down")
               }
               .disabled(!viewModel.canSave)
-              Button {
+              Button("Saved scores", systemImage: "tray.full") {
                 viewModel.savedSheetsButtonDidTap()
-              } label: {
-                Label("Saved scores", systemImage: "tray.full")
               }
               Divider()
               // グラフ: 種目別の得点内訳を表示

@@ -34,8 +34,9 @@ final class ScoreCalculateViewModel: ObservableObject {
 
   /// 保存した記録から自己ベストを読み直す
   private func reloadPersonalBest() {
-    personalBest = sheetStore.personalBest(for: combinedEventInfo.event)
-    personalBestEventPoints = sheetStore.personalBestEventPoints(for: combinedEventInfo.event)
+    let sheets = sheetStore.sheets(for: combinedEventInfo.event)
+    personalBestTotal = sheets.personalBest?.total
+    personalBestEventPoints = sheets.bestEventPoints(eventCount: combinedEventInfo.events.count)
   }
 
   /// 自己ベストとの比較結果
@@ -54,8 +55,8 @@ final class ScoreCalculateViewModel: ObservableObject {
     }
   }
 
-  /// 自己ベスト（保存した記録のうち合計点が最も高いもの）
-  @Published private(set) var personalBest: SavedScoreSheet?
+  /// 合計点の自己ベスト（保存した記録のうち最も高い合計点。記録がない場合はnil）
+  @Published private(set) var personalBestTotal: Int?
   /// 種目ごとの自己ベスト得点（保存した記録の中でその種目の最高点、未入力は0）
   @Published private(set) var personalBestEventPoints: [Int] = []
   /// 記録を保存するたびに増えるカウンタ（触覚フィードバックのトリガー）
@@ -81,11 +82,11 @@ final class ScoreCalculateViewModel: ObservableObject {
 
   /// 合計点の、自己ベストとの比較（差分は全種目を入力し終えたときだけ出す）
   var personalBestTotalComparison: PersonalBestComparison? {
-    guard let personalBest else { return nil }
+    guard let personalBestTotal else { return nil }
     let isComplete = combinedEventInfo.events.enteredCount == combinedEventInfo.events.count
     return PersonalBestComparison(
-      point: personalBest.total,
-      diff: isComplete ? combinedEventInfo.point - personalBest.total : nil
+      point: personalBestTotal,
+      diff: isComplete ? combinedEventInfo.point - personalBestTotal : nil
     )
   }
 
@@ -247,7 +248,6 @@ final class ScoreCalculateViewModel: ObservableObject {
     self.targetStore = targetStore
     self.targetPoint = targetStore.target(for: combinedEvent)
     self.sheetStore = sheetStore
-    self.personalBest = sheetStore.personalBest(for: combinedEvent)
-    self.personalBestEventPoints = sheetStore.personalBestEventPoints(for: combinedEvent)
+    reloadPersonalBest()
   }
 }

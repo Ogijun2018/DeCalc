@@ -8,66 +8,52 @@ import SwiftUI
 /// 保存した記録の一覧画面。最も合計点が高い記録を自己ベストとして表示する
 struct SavedSheetsView: View {
   @StateObject var viewModel: SavedSheetsViewModel
-  @Environment(\.dismiss) private var dismiss
 
   var body: some View {
-    NavigationStack {
-      Group {
-        if viewModel.sheets.isEmpty {
-          ContentUnavailableView(
-            "No saved scores",
-            systemImage: "tray",
-            description: Text("Save your scores from the menu to compare them with your personal best.")
-          )
-        } else {
-          List {
-            Section(viewModel.combinedEvent.localizedName) {
-              ForEach(viewModel.sheets) { sheet in
-                NavigationLink {
-                  SavedSheetDetailView(
-                    title: viewModel.title(for: sheet),
-                    total: sheet.total,
-                    rows: viewModel.detailRows(for: sheet)
-                  )
-                } label: {
-                  row(for: sheet)
-                }
+    Group {
+      if viewModel.rows.isEmpty {
+        ContentUnavailableView(
+          "No saved scores",
+          systemImage: "tray",
+          description: Text("Save your scores from the menu to compare them with your personal best.")
+        )
+      } else {
+        List {
+          Section(viewModel.combinedEvent.localizedName) {
+            ForEach(viewModel.rows) { row in
+              NavigationLink {
+                SavedSheetDetailView(row: row)
+              } label: {
+                rowLabel(row)
               }
-              .onDelete { viewModel.delete(at: $0) }
             }
+            .onDelete { viewModel.delete(at: $0) }
           }
         }
       }
-      .navigationTitle("Saved scores")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .confirmationAction) {
-          Button("Done") { dismiss() }
-        }
-      }
     }
-    .tint(Color.primaryColor)
+    .sheetNavigation(title: "Saved scores")
   }
 
-  /// 一覧の1行（タイトル・日付・合計点・自己ベストの印）
-  private func row(for sheet: SavedScoreSheet) -> some View {
+  /// 一覧の1行（タイトル・日時・自己ベストの印・合計点）
+  private func rowLabel(_ row: SavedSheetsViewModel.Row) -> some View {
     HStack(spacing: 8) {
       VStack(alignment: .leading, spacing: 2) {
-        Text(viewModel.title(for: sheet))
+        Text(row.title)
           .font(.headline)
-        if !sheet.name.isEmpty {
-          Text(viewModel.dateText(for: sheet))
+        if let subtitle = row.subtitle {
+          Text(subtitle)
             .font(.caption)
             .foregroundStyle(.secondary)
         }
       }
       Spacer()
-      if sheet.id == viewModel.personalBestID {
+      if row.isPersonalBest {
         Image(systemName: "crown.fill")
           .foregroundStyle(.yellow)
           .accessibilityLabel("Personal best")
       }
-      Text(points: sheet.total)
+      Text(points: row.total)
         .font(.headline.monospacedDigit())
     }
   }
@@ -75,28 +61,26 @@ struct SavedSheetsView: View {
 
 /// 保存した記録1件の詳細（種目ごとの記録と得点）
 struct SavedSheetDetailView: View {
-  let title: String
-  let total: Int
-  let rows: [SavedSheetsViewModel.DetailRow]
+  let row: SavedSheetsViewModel.Row
 
   var body: some View {
     List {
       Section {
         LabeledContent("Total Point") {
-          Text(points: total)
+          Text(points: row.total)
             .font(.headline.monospacedDigit())
             .foregroundStyle(.primary)
         }
       }
       Section {
-        ForEach(rows) { row in
+        ForEach(row.details) { detail in
           HStack {
-            Text(row.name)
+            Text(detail.name)
               .fontWeight(.semibold)
             Spacer()
-            Text(verbatim: row.record ?? "-")
+            Text(verbatim: detail.record ?? "-")
               .foregroundStyle(.secondary)
-            Text(String(row.point))
+            Text(String(detail.point))
               .fontWeight(.bold)
               .frame(minWidth: 48, alignment: .trailing)
           }
@@ -104,7 +88,7 @@ struct SavedSheetDetailView: View {
         }
       }
     }
-    .navigationTitle(title)
+    .navigationTitle(row.title)
     .navigationBarTitleDisplayMode(.inline)
   }
 }

@@ -50,21 +50,21 @@ struct ScoreSheetStoreTests {
     @Test func 合計点が最も高い記録が自己ベストになる() throws {
         let (store, cleanUp) = try makeStore()
         defer { cleanUp() }
-        #expect(store.personalBest(for: .decathlon) == nil)
+        #expect(store.sheets(for: .decathlon).personalBest == nil)
         let best = SavedScoreSheet(info: makeInfo(.decathlon, points: [900, 900]), name: "")
         store.save(SavedScoreSheet(info: makeInfo(.decathlon, points: [800]), name: ""))
         store.save(best)
-        #expect(store.personalBest(for: .decathlon)?.id == best.id)
+        #expect(store.sheets(for: .decathlon).personalBest?.id == best.id)
     }
 
     @Test func 種目ごとの自己ベストは保存した記録の中の最高点になる() throws {
         let (store, cleanUp) = try makeStore()
         defer { cleanUp() }
-        #expect(store.personalBestEventPoints(for: .decathlon) == Array(repeating: 0, count: 10))
+        #expect(store.sheets(for: .decathlon).bestEventPoints(eventCount: 10) == Array(repeating: 0, count: 10))
         // 合計点の自己ベストは1つ目だが、2種目目の最高点は2つ目の記録
         store.save(SavedScoreSheet(info: makeInfo(.decathlon, points: [900, 600, 800]), name: ""))
         store.save(SavedScoreSheet(info: makeInfo(.decathlon, points: [700, 750]), name: ""))
-        let best = store.personalBestEventPoints(for: .decathlon)
+        let best = store.sheets(for: .decathlon).bestEventPoints(eventCount: 10)
         #expect(Array(best.prefix(4)) == [900, 750, 800, 0])
     }
 

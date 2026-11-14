@@ -7,6 +7,21 @@ import Foundation
 
 /// 保存した記録の一覧画面のViewModel
 final class SavedSheetsViewModel: ObservableObject {
+  /// 一覧の1行分（保存した記録1件）の情報
+  struct Row: Identifiable {
+    let id: UUID
+    /// タイトル（名前。なければ保存した日時）
+    let title: String
+    /// 名前がある場合に添える、保存した日時
+    let subtitle: String?
+    /// 合計点
+    let total: Int
+    /// 自己ベスト（合計点が最も高い記録）かどうか
+    let isPersonalBest: Bool
+    /// 種目ごとの記録と得点
+    let details: [DetailRow]
+  }
+
   /// 詳細画面に表示する1種目分の情報
   struct DetailRow: Identifiable {
     let id: Int
@@ -18,35 +33,45 @@ final class SavedSheetsViewModel: ObservableObject {
     let point: Int
   }
 
-  /// 保存済みの記録（新しい順）
-  @Published private(set) var sheets: [SavedScoreSheet]
+  /// 一覧に表示する行（新しい順）
+  @Published private(set) var rows: [Row] = []
 
   let combinedEvent: CombinedEvent
   private let store: ScoreSheetStoring
 
-  /// 自己ベスト（合計点が最も高い記録）のID
-  var personalBestID: UUID? {
-    sheets.max { $0.total < $1.total }?.id
-  }
-
   init(combinedEvent: CombinedEvent, store: ScoreSheetStoring = ScoreSheetStore()) {
     self.combinedEvent = combinedEvent
     self.store = store
-    self.sheets = store.sheets(for: combinedEvent)
+    reload()
   }
 
-  /// 一覧に表示するタイトル（名前がなければ日付）
-  func title(for sheet: SavedScoreSheet) -> String {
-    sheet.name.isEmpty ? dateText(for: sheet) : sheet.name
+  /// スワイプで削除したとき
+  func delete(at offsets: IndexSet) {
+    for index in offsets {
+      store.delete(id: rows[index].id)
+    }
+    reload()
   }
 
-  /// 保存した日付
-  func dateText(for sheet: SavedScoreSheet) -> String {
-    sheet.date.formatted(date: .abbreviated, time: .shortened)
+  /// 保存した記録を読み直して、表示用の行を作る
+  private func reload() {
+    let sheets = store.sheets(for: combinedEvent)
+    let personalBestID = sheets.personalBest?.id
+    rows = sheets.map { sheet in
+      let dateText = sheet.date.formatted(date: .abbreviated, time: .shortened)
+      return Row(
+        id: sheet.id,
+        title: sheet.name.isEmpty ? dateText : sheet.name,
+        subtitle: sheet.name.isEmpty ? nil : dateText,
+        total: sheet.total,
+        isPersonalBest: sheet.id == personalBestID,
+        details: detailRows(for: sheet)
+      )
+    }
   }
 
-  /// 詳細画面に表示する種目ごとの記録と得点
-  func detailRows(for sheet: SavedScoreSheet) -> [DetailRow] {
+  /// 種目ごとの記録と得点
+  private func detailRows(for sheet: SavedScoreSheet) -> [DetailRow] {
     zip(combinedEvent.events, sheet.entries).enumerated().map { index, pair in
       let (info, entry) = pair
       return DetailRow(
@@ -56,13 +81,5 @@ final class SavedSheetsViewModel: ObservableObject {
         point: entry.point
       )
     }
-  }
-
-  /// スワイプで削除したとき
-  func delete(at offsets: IndexSet) {
-    for index in offsets {
-      store.delete(id: sheets[index].id)
-    }
-    sheets = store.sheets(for: combinedEvent)
   }
 }
