@@ -57,6 +57,7 @@ struct ScoreCalculateView: View {
                 Spacer()
                 personalBestLabel(comparison)
               }
+              .hiddenWhileEditing(isEditing)
             }
             // 入力済みの種目数
             HStack(spacing: 8) {
