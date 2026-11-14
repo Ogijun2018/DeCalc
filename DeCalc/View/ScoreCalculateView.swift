@@ -252,7 +252,11 @@ struct ScoreCalculateView: View {
             Image(systemName: "p.circle")
               .font(.system(size: 25))
             ScoreTextView(
-              point: $viewModel.combinedEventInfo.events[eventIndex].point,
+              // 手で編集した得点は記録と連動させないため、ViewModel経由で書き込む
+              point: Binding(
+                get: { viewModel.combinedEventInfo.events[eventIndex].point },
+                set: { viewModel.pointDidEdit(index: eventIndex, point: $0) }
+              ),
               isFocused: $isPointFocused,
               textFieldId: event.idForScore.hashValue
             )
