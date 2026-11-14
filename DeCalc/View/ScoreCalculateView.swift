@@ -151,10 +151,11 @@ struct ScoreCalculateView: View {
     } label: {
       HStack(spacing: 8) {
         if let target = viewModel.targetPoint, let remaining = viewModel.remainingToTarget {
-          Label("Target \(target)", systemImage: "target")
+          // 合計点の表示とそろえて桁区切りを入れないよう、文字列にしてから渡す
+          Label("Target \(String(target))", systemImage: "target")
           Spacer()
           if remaining > 0 {
-            Text("\(remaining) to go")
+            Text("\(String(remaining)) to go")
               .contentTransition(.numericText(value: Double(remaining)))
               .animation(.snappy, value: remaining)
           } else {

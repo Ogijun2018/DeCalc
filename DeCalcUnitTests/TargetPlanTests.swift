@@ -45,12 +45,14 @@ struct TargetPlanTests {
         }
     }
 
-    @Test func 最高得点を超える場合は理由がわかる() {
-        // 1種目あたり5000点 → どの種目も最高得点を超える
+    @Test func 最高得点でも届かない種目は記録の目安が出ない() {
+        // 四種（男子）で1種目あたり5000点
+        // 400m（最高4474点）と110mH（最高3566点）は届かず、走高跳と砲丸投は入力できる範囲に収まる
         let tetrathlon = CombinedEvent.tetrathlon(.Men)
         let plan = TargetPlan(info: .init(event: tetrathlon, events: tetrathlon.events), target: 20000)
         #expect(plan.requirements.count == 4)
-        #expect(plan.requirements.allSatisfy { $0.recordDigits == nil && $0.unavailable == .aboveMaximum })
+        let outOfReach = plan.requirements.filter { $0.recordDigits == nil }.map(\.event)
+        #expect(outOfReach == [.Run(.fourHundredM), .Run(.hundredTenMHurdles)])
     }
 
     @Test func 目標を超えている場合は達成済みになる() {
