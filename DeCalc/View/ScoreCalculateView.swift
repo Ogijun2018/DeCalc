@@ -27,67 +27,7 @@ struct ScoreCalculateView: View {
       ScrollViewReader { proxy in
         ScrollView {
           ForEach(viewModel.combinedEventInfo.events, id: \.id) { event in
-            GroupBox {
-              VStack(spacing: 5) {
-                HStack {
-                  Text(event.event.description)
-                    .font(.system(size: 25, weight: .heavy))
-                  Spacer()
-                }
-                if let eventIndex = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
-                  RecordTextView(
-                    record: $viewModel.combinedEventInfo.events[eventIndex].score,
-                    isFocused: $isScoreFocused,
-                    numberLength: event.event.digit,
-                    units: (
-                      event.event.leadUnit,
-                      event.event.centerUnit,
-                      event.event.trailUnit
-                    ),
-                    leadingUnitPoint: event.event.leadUnitPoint,
-                    unitPoint: event.event.unitPoint,
-                    textFieldId: event.id.hashValue,
-                    onPressTextView: {
-                      let targetFocus: Focus? = .focused(id: event.id.hashValue)
-                      let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
-                      isScoreFocused = newFocus
-                      // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
-                      // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
-                      scrollToFocusedEvent(newFocus, proxy: proxy)
-                    },
-                    scoreFilled: {
-                      viewModel.scoreFilled(index: eventIndex)
-                    }
-                  )
-                  HStack(spacing: 10) {
-                    Image(systemName: "p.circle")
-                      .font(.system(size: 25))
-                    ScoreTextView(
-                      point: $viewModel.combinedEventInfo.events[eventIndex].point,
-                      isFocused: $isPointFocused,
-                      textFieldId: event.idForScore.hashValue
-                    )
-                    Text("pt")
-                      .font(.system(size: 20, weight: .semibold))
-                    Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
-                      viewModel.calculateButtonDidTap(index: eventIndex)
-                    }
-                    .padding(10)
-                    .glassEffect(
-                      .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
-                    )
-                  }
-                  if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
-                    Text(error)
-                      .font(.system(size: 11))
-                      .foregroundStyle(.red)
-                      .padding(.top, 5)
-                  }
-                }
-              }
-            }
-            .padding(.horizontal)
-            .id(event.id)
+            eventCard(event, proxy: proxy)
           }
         }
         .safeAreaInset(edge: .top) {
@@ -98,6 +38,10 @@ struct ScoreCalculateView: View {
               Spacer()
               Text(String(viewModel.combinedEventInfo.point))
                 .font(.title2.weight(.bold))
+                .monospacedDigit()
+                // 合計点の変化を数字が転がるアニメーションで表現する
+                .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
+                .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
           }
           .padding()
@@ -136,12 +80,24 @@ struct ScoreCalculateView: View {
               Image(systemName: "ellipsis")
             }
           }
-          // チェックボタンでキーボードを閉じる
           ToolbarItemGroup(placement: .keyboard) {
+            // 前後の種目の入力欄へ移動する
+            Button { moveFocus(by: -1, proxy: proxy) } label: {
+              Image(systemName: "chevron.up")
+            }
+            .disabled(!canMoveFocus(by: -1))
+            .accessibilityLabel("Previous")
+            Button { moveFocus(by: 1, proxy: proxy) } label: {
+              Image(systemName: "chevron.down")
+            }
+            .disabled(!canMoveFocus(by: 1))
+            .accessibilityLabel("Next")
             Spacer()
+            // チェックボタンでキーボードを閉じる
             Button { dismissKeyboard() } label: {
               Image(systemName: "checkmark")
             }
+            .accessibilityLabel("Done")
           }
         }
         // 得点欄（実体のあるTextField）はフォーカスの変化を検知してスクロールする
@@ -161,7 +117,127 @@ struct ScoreCalculateView: View {
         viewModel.didTapDeleteButton()
       }
     }
+    // 得点が確定したとき・逆算に失敗したときに触覚で知らせる
+    .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
+    .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 1種目分の入力カード（記録・得点・逆算ボタン）
+  @ViewBuilder
+  private func eventCard(_ event: EventInfo, proxy: ScrollViewProxy) -> some View {
+    GroupBox {
+      VStack(spacing: 5) {
+        HStack {
+          Text(event.event.description)
+            .font(.system(size: 25, weight: .heavy))
+          Spacer()
+        }
+        if let eventIndex = viewModel.combinedEventInfo.events.firstIndex(where: { $0.id == event.id }) {
+          RecordTextView(
+            record: $viewModel.combinedEventInfo.events[eventIndex].score,
+            isFocused: $isScoreFocused,
+            numberLength: event.event.digit,
+            units: (
+              event.event.leadUnit,
+              event.event.centerUnit,
+              event.event.trailUnit
+            ),
+            leadingUnitPoint: event.event.leadUnitPoint,
+            unitPoint: event.event.unitPoint,
+            textFieldId: event.id.hashValue,
+            onPressTextView: {
+              let targetFocus: Focus? = .focused(id: event.id.hashValue)
+              let newFocus: Focus? = isScoreFocused == targetFocus ? nil : targetFocus
+              isScoreFocused = newFocus
+              // 記録欄は0サイズの隠しTextFieldをプログラム的にフォーカスするため
+              // onChange(of: FocusState)では追従できない。タップ時に明示的にスクロールする
+              scrollToFocusedEvent(newFocus, proxy: proxy)
+            },
+            scoreFilled: {
+              viewModel.scoreFilled(index: eventIndex)
+              advanceFocusIfNeeded(from: eventIndex, proxy: proxy)
+            },
+            recordIncomplete: {
+              viewModel.recordBecameIncomplete(index: eventIndex)
+            }
+          )
+          HStack(spacing: 10) {
+            Image(systemName: "p.circle")
+              .font(.system(size: 25))
+            ScoreTextView(
+              point: $viewModel.combinedEventInfo.events[eventIndex].point,
+              isFocused: $isPointFocused,
+              textFieldId: event.idForScore.hashValue
+            )
+            Text("pt")
+              .font(.system(size: 20, weight: .semibold))
+            Button("\(Image(systemName: "p.circle"))→\(Image(systemName: "figure.run.circle"))") {
+              viewModel.calculateButtonDidTap(index: eventIndex)
+            }
+            .padding(10)
+            .glassEffect(
+              .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
+            )
+          }
+          if let error = viewModel.combinedEventInfo.events[eventIndex].errorText {
+            Text(error)
+              .font(.system(size: 11))
+              .foregroundStyle(.red)
+              .padding(.top, 5)
+          }
+        }
+      }
+    }
+    .padding(.horizontal)
+    .id(event.id)
+  }
+
+  /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す
+  private func advanceFocusIfNeeded(from index: Int, proxy: ScrollViewProxy) {
+    let events = viewModel.combinedEventInfo.events
+    // 逆算ボタンなどキーボード入力以外で記録が埋まった場合は移動しない
+    guard isScoreFocused == .focused(id: events[index].id.hashValue) else { return }
+    if let next = viewModel.nextEmptyRecordIndex(after: index) {
+      let focus: Focus = .focused(id: events[next].id.hashValue)
+      isScoreFocused = focus
+      scrollToFocusedEvent(focus, proxy: proxy)
+    } else if viewModel.isLastEvent(index: index) {
+      // 最後の種目まで入力し終えたらキーボードを閉じる
+      dismissKeyboard()
+    }
+  }
+
+  /// フォーカス中の入力欄がある種目のインデックス
+  private var focusedEventIndex: Int? {
+    if case let .focused(id)? = isScoreFocused {
+      return viewModel.eventIndex(forFocusID: id)
+    }
+    if case let .focused(id)? = isPointFocused {
+      return viewModel.eventIndex(forFocusID: id)
+    }
+    return nil
+  }
+
+  /// 前後の種目へフォーカスを移動できるか
+  private func canMoveFocus(by offset: Int) -> Bool {
+    guard let index = focusedEventIndex else { return false }
+    return viewModel.neighborIndex(of: index, offset: offset) != nil
+  }
+
+  /// 前後の種目の同じ種類の入力欄（記録→記録、得点→得点）へフォーカスを移す
+  private func moveFocus(by offset: Int, proxy: ScrollViewProxy) {
+    guard let index = focusedEventIndex,
+          let target = viewModel.neighborIndex(of: index, offset: offset) else { return }
+    let event = viewModel.combinedEventInfo.events[target]
+    if isScoreFocused != nil {
+      let focus: Focus = .focused(id: event.id.hashValue)
+      isScoreFocused = focus
+      scrollToFocusedEvent(focus, proxy: proxy)
+    } else {
+      // 得点欄はonChange(of: isPointFocused)でスクロールされる
+      isPointFocused = .focused(id: event.idForScore.hashValue)
+    }
   }
 
   /// フォーカスを解除してソフトウェアキーボードを閉じる

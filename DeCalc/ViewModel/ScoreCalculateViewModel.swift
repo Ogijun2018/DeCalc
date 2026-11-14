@@ -21,20 +21,64 @@ final class ScoreCalculateViewModel: ObservableObject {
   func onPressRecordTextView(id: Int) {
   }
 
+  /// 記録から得点が確定するたびに増えるカウンタ（触覚フィードバックのトリガー）
+  @Published private(set) var scoreFeedbackTrigger = 0
+  /// 逆算に失敗するたびに増えるカウンタ（触覚フィードバックのトリガー）
+  @Published private(set) var errorFeedbackTrigger = 0
+
   func scoreFilled(index: Int) {
     let eventInfo = combinedEventInfo.events[index]
     let score = eventInfo.score
     guard let score, let intScore = Int(score) else { return }
     do {
-      combinedEventInfo.events[index].point = try eventInfo.convertToPoint(score: intScore)
+      let point = try eventInfo.convertToPoint(score: intScore)
+      combinedEventInfo.events[index].point = point
+      if point > 0 {
+        scoreFeedbackTrigger += 1
+      }
     } catch {
       combinedEventInfo.events[index].point = 0
     }
+    combinedEventInfo.events[index].isPointFromRecord = true
+  }
+
+  /// 記録が桁数に満たなくなったとき、記録から計算した得点が残らないよう消す
+  func recordBecameIncomplete(index: Int) {
+    guard combinedEventInfo.events[index].isPointFromRecord else { return }
+    combinedEventInfo.events[index].point = 0
+    combinedEventInfo.events[index].isPointFromRecord = false
+  }
+
+  /// 指定した種目より後ろにある、記録が未入力の最初の種目のインデックス
+  func nextEmptyRecordIndex(after index: Int) -> Int? {
+    let events = combinedEventInfo.events
+    guard index + 1 < events.count else { return nil }
+    return events.indices[(index + 1)...].first { (events[$0].score ?? "").isEmpty }
+  }
+
+  /// 最後の種目かどうか
+  func isLastEvent(index: Int) -> Bool {
+    index == combinedEventInfo.events.count - 1
+  }
+
+  /// フォーカスID（記録欄・得点欄のどちらでも）から種目のインデックスを求める
+  func eventIndex(forFocusID id: Int) -> Int? {
+    combinedEventInfo.events.firstIndex {
+      $0.id.hashValue == id || $0.idForScore.hashValue == id
+    }
+  }
+
+  /// 前後の種目のインデックス（範囲外の場合はnil）
+  func neighborIndex(of index: Int, offset: Int) -> Int? {
+    let target = index + offset
+    return combinedEventInfo.events.indices.contains(target) ? target : nil
   }
 
   func calculateButtonDidTap(index: Int) {
     let eventInfo = combinedEventInfo.events[index]
     let point = eventInfo.point
+    // ここからは入力された得点が基準になる
+    combinedEventInfo.events[index].isPointFromRecord = false
     do {
       combinedEventInfo.events[index].errorText = nil
       // 計算後の記録の桁数がdigitに満たない場合は0埋めする
@@ -46,12 +90,15 @@ final class ScoreCalculateViewModel: ObservableObject {
     } catch EventInfo.CalculationError.overPoint {
       combinedEventInfo.events[index].errorText = String(localized: "Please enter a score of \(eventInfo.maxPoint) or less")
       combinedEventInfo.events[index].score = ""
+      errorFeedbackTrigger += 1
     } catch EventInfo.CalculationError.invalidResult {
       combinedEventInfo.events[index].errorText = String(localized: "Invalid input")
       combinedEventInfo.events[index].score = ""
+      errorFeedbackTrigger += 1
     } catch {
       combinedEventInfo.events[index].errorText = String(localized: "Invalid input")
       combinedEventInfo.events[index].score = ""
+      errorFeedbackTrigger += 1
     }
   }
 
@@ -64,6 +111,7 @@ final class ScoreCalculateViewModel: ObservableObject {
       combinedEventInfo.events[index].score = nil
       combinedEventInfo.events[index].point = 0
       combinedEventInfo.events[index].errorText = nil
+      combinedEventInfo.events[index].isPointFromRecord = false
     }
   }
 

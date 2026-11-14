@@ -16,6 +16,9 @@ struct EventInfo: Identifiable, Hashable {
   var score: String?
   /// 一種目の点数
   var point: Int = 0
+  /// 得点が記録から自動計算されたものかどうか
+  /// （記録が消されたときに、連動して得点を消してよいかの判定に使う）
+  var isPointFromRecord = false
   /// 種目の最大点数（理論値）
   var maxPoint: Int {
     switch event {

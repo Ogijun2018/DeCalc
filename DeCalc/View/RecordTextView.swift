@@ -20,6 +20,8 @@ struct RecordTextView: View {
   var keyboardType: UIKeyboardType = .numberPad
   var onPressTextView: (() -> Void)?
   var scoreFilled: (() -> Void)?
+  /// 記録が桁数に満たない状態に変わったとき（数字を消したときなど）
+  var recordIncomplete: (() -> Void)?
 
   var body: some View {
     ZStack(alignment: .center) {
@@ -37,7 +39,8 @@ struct RecordTextView: View {
             Text(getPin(at: index))
               .font(.system(size: 30))
               .fontWeight(.semibold)
-              .foregroundColor(.black)
+              // ダークモードでも読めるようシステムの文字色に追従させる
+              .foregroundStyle(.primary)
           }
           ForEach(Array(unitsToInsert(after: index).enumerated()), id: \.offset) { entry in
             unitLabel(entry.element)
@@ -61,6 +64,8 @@ struct RecordTextView: View {
           record = text
           if text.count >= numberLength {
             scoreFilled?()
+          } else {
+            recordIncomplete?()
           }
         }
       )
