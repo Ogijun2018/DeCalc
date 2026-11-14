@@ -33,8 +33,15 @@ struct CombinedEventInfoTests {
         events[1].point = 700
         events[5].point = 900
         let info = CombinedEventInfo(event: .decathlon, events: events)
-        #expect(info.daySections.map(\.point) == [1500, 900])
-        #expect(info.daySections.map(\.enteredCount) == [2, 1])
-        #expect(info.enteredCount == 3)
+        #expect(info.daySections.map(\.events.totalPoint) == [1500, 900])
+        #expect(info.daySections.map(\.events.enteredCount) == [2, 1])
+        #expect(info.events.enteredCount == 3)
+        #expect(info.point == 2400)
+    }
+
+    @Test func セクション内の種目は全種目の配列での位置を保つ() {
+        // 画面は、この位置を使って種目カードとViewModelを結びつける
+        let info = CombinedEventInfo(event: .decathlon, events: CombinedEvent.decathlon.events)
+        #expect(info.daySections.map(\.events.indices) == [0..<5, 5..<10])
     }
 }

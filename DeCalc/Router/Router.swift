@@ -12,7 +12,9 @@ extension Identifiable where Self: Hashable {
     var id: Self { self }
 }
 
-enum Router: View, Hashable, Identifiable {
+/// 遷移先の画面を表す値
+/// ViewModelからも扱えるよう、View型には依存しない（画面の生成はRouterViewが行う）
+enum Router: Hashable, Identifiable {
     case Score(CombinedEvent)
     /// ヘルプ画面
     case Help(CombinedEvent)
@@ -20,13 +22,18 @@ enum Router: View, Hashable, Identifiable {
     case Planner(CombinedEventInfo)
     /// 結果のシェア画面
     case Share(CombinedEventInfo)
+}
+
+/// Routerが表す画面
+struct RouterView: View {
+    let router: Router
 
     var body: some View {
-        switch self {
-        case .Score(let event): return AnyView(ScoreCalculateView(viewModel: .init(combinedEvent: event)))
-        case .Help(let event): return AnyView(HelpView(viewModel: .init(combinedEvent: event)))
-        case .Planner(let info): return AnyView(PlannerView(viewModel: .init(combinedEventInfo: info)))
-        case .Share(let info): return AnyView(ShareResultView(viewModel: .init(combinedEventInfo: info)))
+        switch router {
+        case .Score(let event): ScoreCalculateView(viewModel: .init(combinedEvent: event))
+        case .Help(let event): HelpView(viewModel: .init(combinedEvent: event))
+        case .Planner(let info): PlannerView(viewModel: .init(combinedEventInfo: info))
+        case .Share(let info): ShareResultView(viewModel: .init(combinedEventInfo: info))
         }
     }
 }

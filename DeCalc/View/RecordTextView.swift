@@ -20,8 +20,6 @@ struct RecordTextView: View {
   var keyboardType: UIKeyboardType = .numberPad
   var onPressTextView: (() -> Void)?
   var scoreFilled: (() -> Void)?
-  /// 記録が桁数に満たない状態に変わったとき（数字を消したときなど）
-  var recordIncomplete: (() -> Void)?
 
   var body: some View {
     ZStack(alignment: .center) {
@@ -64,8 +62,6 @@ struct RecordTextView: View {
           record = text
           if text.count >= numberLength {
             scoreFilled?()
-          } else {
-            recordIncomplete?()
           }
         }
       )
