@@ -353,7 +353,7 @@ struct ScoreCalculateView: View {
     }
     .font(.body.weight(.semibold))
     .padding(.horizontal)
-    .padding(.bottom, 20)
+    .padding(.bottom, 10)
   }
 
   /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す（後ろ→先頭の順に探す）
