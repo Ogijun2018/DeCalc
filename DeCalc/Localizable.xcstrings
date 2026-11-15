@@ -945,6 +945,52 @@
         }
       }
     },
+    "Next" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Successivo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一个"
+          }
+        }
+      }
+    },
     "Octathlon" : {
       "localizations" : {
         "de" : {
@@ -1037,48 +1083,48 @@
         }
       }
     },
-    "Please enter a score of %lld or less" : {
+    "Please enter a score of %@ or less" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitte gib eine Punktzahl von %lld oder weniger ein"
+            "value" : "Bitte gib eine Punktzahl von %@ oder weniger ein"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Introduce una puntuación de %lld o menos"
+            "value" : "Introduce una puntuación de %@ o menos"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veuillez saisir un score de %lld ou moins"
+            "value" : "Veuillez saisir un score de %@ ou moins"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inserisci un punteggio di %lld o inferiore"
+            "value" : "Inserisci un punteggio di %@ o inferiore"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld点以下を入力してください"
+            "value" : "%@点以下を入力してください"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld점 이하를 입력하세요"
+            "value" : "%@점 이하를 입력하세요"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请输入不超过 %lld 的分数"
+            "value" : "请输入不超过 %@ 的分数"
           }
         }
       }
@@ -1171,6 +1217,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "撑竿跳高"
+          }
+        }
+      }
+    },
+    "Previous" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anterior"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Précédent"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precedente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이전"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上一个"
           }
         }
       }

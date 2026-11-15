@@ -37,7 +37,8 @@ struct RecordTextView: View {
             Text(getPin(at: index))
               .font(.system(size: 30))
               .fontWeight(.semibold)
-              .foregroundColor(.black)
+              // ダークモードでも読めるようシステムの文字色に追従させる
+              .foregroundStyle(.primary)
           }
           ForEach(Array(unitsToInsert(after: index).enumerated()), id: \.offset) { entry in
             unitLabel(entry.element)
