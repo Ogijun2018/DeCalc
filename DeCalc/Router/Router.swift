@@ -15,6 +15,8 @@ enum Router: Hashable, Identifiable {
     case Help(CombinedEvent)
     /// 目標点プランナー画面
     case Planner(CombinedEventInfo)
+    /// 結果のシェア画面
+    case Share(CombinedEventInfo)
 
     /// 値そのものを識別子にする（`.sheet(item:)` での表示に使う）
     /// 以前は Hashable な Identifiable すべてにこの定義を広げていたが、自前の id を持つ型
@@ -32,6 +34,7 @@ struct RouterView: View {
         case .Score(let event): ScoreCalculateView(viewModel: .init(combinedEvent: event))
         case .Help(let event): HelpView(viewModel: .init(combinedEvent: event))
         case .Planner(let info): PlannerView(viewModel: .init(combinedEventInfo: info))
+        case .Share(let info): ShareResultView(viewModel: .init(combinedEventInfo: info))
         }
     }
 }

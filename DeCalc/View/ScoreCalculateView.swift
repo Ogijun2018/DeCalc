@@ -82,6 +82,10 @@ struct ScoreCalculateView: View {
           ToolbarSpacer(.fixed, placement: .topBarTrailing)
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
+              // シェア: 結果カードを画像・テキストで共有
+              Button("Share result", systemImage: "square.and.arrow.up") {
+                viewModel.shareButtonDidTap()
+              }
               // 記録全削除: 既存のゴミ箱と同じ挙動（確認アラートを表示）
               Button("Delete all scores", systemImage: "trash", role: .destructive) {
                 isShowingClearAlert = true
