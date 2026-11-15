@@ -269,7 +269,7 @@ struct ScoreCalculateView: View {
   }
 
   /// 入力中にキーボードのすぐ上へ表示するボタン（前後の種目への移動・キーボードを閉じる）
-  /// キーボードのツールバーに置くとキーボードとの間隔を変えられないため、画面側に置いて20pt空ける
+  /// キーボードのツールバーに置くとキーボードとの間隔を変えられないため、画面側に置いて10pt空ける
   private func keyboardBar(proxy: ScrollViewProxy) -> some View {
     HStack {
       HStack(spacing: 0) {
@@ -298,7 +298,7 @@ struct ScoreCalculateView: View {
     }
     .font(.body.weight(.semibold))
     .padding(.horizontal)
-    .padding(.bottom, 20)
+    .padding(.bottom, 10)
   }
 
   /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す（後ろ→先頭の順に探す）
