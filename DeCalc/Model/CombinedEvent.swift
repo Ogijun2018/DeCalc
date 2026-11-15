@@ -69,6 +69,16 @@ enum CombinedEvent: Hashable, CaseIterable, CustomStringConvertible {
     /// 七種競技
     case heptathlon
 
+    /// 1日目に行う種目数（1日で完結する競技はnil）
+    var firstDayEventCount: Int? {
+        switch self {
+        case .decathlon: 5
+        case .octathlon: 4
+        case .heptathlon: 4
+        case .tetrathlon: nil
+        }
+    }
+
     var events: [EventInfo] {
         switch self {
         case .decathlon: [

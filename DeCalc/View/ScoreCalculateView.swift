@@ -24,8 +24,15 @@ struct ScoreCalculateView: View {
     NavigationStack {
       ScrollViewReader { proxy in
         ScrollView {
-          ForEach(viewModel.combinedEventInfo.events.indices, id: \.self) { index in
-            eventCard(index: index, proxy: proxy)
+          // 識別子は「何日目か」だけにする。種目の内容まで含めると、1文字入力するたびに
+          // 別のセクションとして作り直され、入力欄のフォーカスが外れてしまう
+          ForEach(viewModel.combinedEventInfo.daySections, id: \.day) { section in
+            if let day = section.day {
+              daySectionHeader(day: day, events: section.events)
+            }
+            ForEach(section.events.indices, id: \.self) { index in
+              eventCard(index: index, proxy: proxy)
+            }
           }
         }
         .safeAreaInset(edge: .top) {
@@ -41,7 +48,13 @@ struct ScoreCalculateView: View {
                 .contentTransition(.numericText(value: Double(viewModel.combinedEventInfo.point)))
                 .animation(.snappy, value: viewModel.combinedEventInfo.point)
             }
+            // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
+            if !isEditing {
+              progressRow
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
           }
+          .animation(.snappy, value: isEditing)
           .padding()
           .glassEffect(
             .regular.tint(Color.primaryColor.opacity(0.2)).interactive(),
@@ -102,6 +115,46 @@ struct ScoreCalculateView: View {
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
     .tint(Color.primaryColor)
+  }
+
+  /// 入力済みの種目数（バーと「3/10」の表示）
+  private var progressRow: some View {
+    let entered = viewModel.combinedEventInfo.events.enteredCount
+    let total = viewModel.combinedEventInfo.events.count
+    return HStack(spacing: 8) {
+      ProgressView(value: Double(entered), total: Double(total))
+      Text(verbatim: "\(entered)/\(total)")
+        .font(.caption.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(.secondary)
+    }
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("\(entered) of \(total) events entered")
+  }
+
+  /// 競技日の見出し（何日目・入力済み種目数・小計）
+  private func daySectionHeader(day: Int, events: ArraySlice<EventInfo>) -> some View {
+    HStack(alignment: .firstTextBaseline, spacing: 8) {
+      Text("Day \(day)")
+        .font(.title3.weight(.heavy))
+      Text(verbatim: "\(events.enteredCount)/\(events.count)")
+        .font(.subheadline.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(.secondary)
+      Spacer()
+      HStack(alignment: .firstTextBaseline, spacing: 4) {
+        Text(String(events.totalPoint))
+          .font(.title3.weight(.bold))
+          .monospacedDigit()
+          .contentTransition(.numericText(value: Double(events.totalPoint)))
+          .animation(.snappy, value: events.totalPoint)
+        Text("pt")
+          .font(.subheadline.weight(.semibold))
+      }
+    }
+    .padding(.horizontal, 24)
+    .padding(.top, 12)
+    .accessibilityElement(children: .combine)
   }
 
   /// 1種目分の入力カード（記録・得点・逆算ボタン）
