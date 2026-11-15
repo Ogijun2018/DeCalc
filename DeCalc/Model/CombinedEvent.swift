@@ -69,6 +69,11 @@ enum CombinedEvent: Hashable, CaseIterable, CustomStringConvertible {
     /// 七種競技
     case heptathlon
 
+    /// 競技の性別（ホーム画面でどちらの性別に並ぶか）
+    var gender: Gender {
+        Self.menEvents.contains(self) ? .Men : .Women
+    }
+
     /// 端末内への保存時に競技を識別するキー（表示言語に依存しない）
     var storageKey: String {
         switch self {
