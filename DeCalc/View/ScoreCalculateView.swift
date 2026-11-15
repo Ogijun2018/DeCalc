@@ -62,6 +62,11 @@ struct ScoreCalculateView: View {
           )
           .padding(.horizontal)
         }
+        .safeAreaInset(edge: .bottom) {
+          if isEditing {
+            keyboardBar(proxy: proxy)
+          }
+        }
         .navigationTitle(viewModel.combinedEventInfo.event.localizedName)
         .navigationBarTitleDisplayMode(.automatic)
         .toolbar {
@@ -84,25 +89,6 @@ struct ScoreCalculateView: View {
             } label: {
               Image(systemName: "ellipsis")
             }
-          }
-          ToolbarItemGroup(placement: .keyboard) {
-            // 前後の種目の入力欄へ移動する
-            Button { moveFocus(by: -1, proxy: proxy) } label: {
-              Image(systemName: "chevron.up")
-            }
-            .disabled(!canMoveFocus(by: -1))
-            .accessibilityLabel("Previous")
-            Button { moveFocus(by: 1, proxy: proxy) } label: {
-              Image(systemName: "chevron.down")
-            }
-            .disabled(!canMoveFocus(by: 1))
-            .accessibilityLabel("Next")
-            Spacer()
-            // チェックボタンでキーボードを閉じる
-            Button { dismissKeyboard() } label: {
-              Image(systemName: "checkmark")
-            }
-            .accessibilityLabel("Done")
           }
         }
         // 得点欄（実体のあるTextField）はフォーカスの変化を検知してスクロールする
@@ -238,6 +224,39 @@ struct ScoreCalculateView: View {
     }
     .padding(.horizontal)
     .id(event.id)
+  }
+
+  /// 入力中にキーボードのすぐ上へ表示するボタン（前後の種目への移動・キーボードを閉じる）
+  /// キーボードのツールバーに置くとキーボードとの間隔を変えられないため、画面側に置いて20pt空ける
+  private func keyboardBar(proxy: ScrollViewProxy) -> some View {
+    HStack {
+      HStack(spacing: 0) {
+        Button { moveFocus(by: -1, proxy: proxy) } label: {
+          Image(systemName: "chevron.up")
+            .frame(width: 44, height: 44)
+        }
+        .disabled(!canMoveFocus(by: -1))
+        .accessibilityLabel("Previous")
+        Button { moveFocus(by: 1, proxy: proxy) } label: {
+          Image(systemName: "chevron.down")
+            .frame(width: 44, height: 44)
+        }
+        .disabled(!canMoveFocus(by: 1))
+        .accessibilityLabel("Next")
+      }
+      .glassEffect(.regular.interactive(), in: .capsule)
+      Spacer()
+      // チェックボタンでキーボードを閉じる
+      Button { dismissKeyboard() } label: {
+        Image(systemName: "checkmark")
+          .frame(width: 44, height: 44)
+      }
+      .glassEffect(.regular.interactive(), in: .circle)
+      .accessibilityLabel("Done")
+    }
+    .font(.body.weight(.semibold))
+    .padding(.horizontal)
+    .padding(.bottom, 20)
   }
 
   /// 記録欄が埋まったら、次の未入力の記録欄へフォーカスを移す（後ろ→先頭の順に探す）
