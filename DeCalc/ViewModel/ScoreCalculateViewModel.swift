@@ -29,6 +29,78 @@ final class ScoreCalculateViewModel: ObservableObject {
   /// シートが閉じられたとき、シート側で変更された内容を読み直す
   func sheetDidDismiss() {
     targetPoint = targetStore.target(for: combinedEventInfo.event)
+    reloadPersonalBest()
+  }
+
+  /// 保存した記録から自己ベストを読み直す
+  private func reloadPersonalBest() {
+    let sheets = sheetStore.sheets(for: combinedEventInfo.event)
+    personalBestTotal = sheets.personalBest?.total
+    personalBestEventPoints = sheets.bestEventPoints(eventCount: combinedEventInfo.events.count)
+  }
+
+  /// 自己ベストとの比較結果
+  struct PersonalBestComparison {
+    /// 自己ベストの得点
+    let point: Int
+    /// 現在の得点との差（現在の得点が未入力の場合はnil）
+    let diff: Int?
+
+    /// 符号つきの差分表示（ex. +12, −5, ±0）
+    var diffText: String? {
+      guard let diff else { return nil }
+      if diff > 0 { return "+\(diff)" }
+      if diff < 0 { return "−\(-diff)" }
+      return "±0"
+    }
+  }
+
+  /// 合計点の自己ベスト（保存した記録のうち最も高い合計点。記録がない場合はnil）
+  @Published private(set) var personalBestTotal: Int?
+  /// 種目ごとの自己ベスト得点（保存した記録の中でその種目の最高点、未入力は0）
+  @Published private(set) var personalBestEventPoints: [Int] = []
+  /// 記録を保存するたびに増えるカウンタ（触覚フィードバックのトリガー）
+  @Published private(set) var saveFeedbackTrigger = 0
+  private let sheetStore: ScoreSheetStoring
+
+  /// 保存できる得点があるか
+  var canSave: Bool {
+    combinedEventInfo.point > 0
+  }
+
+  /// 指定した種目の、その種目の自己ベストとの比較（保存した記録にその種目の得点がない場合はnil）
+  func personalBestComparison(at index: Int) -> PersonalBestComparison? {
+    guard personalBestEventPoints.indices.contains(index),
+          personalBestEventPoints[index] > 0 else { return nil }
+    let bestPoint = personalBestEventPoints[index]
+    let currentPoint = combinedEventInfo.events[index].point
+    return PersonalBestComparison(
+      point: bestPoint,
+      diff: currentPoint > 0 ? currentPoint - bestPoint : nil
+    )
+  }
+
+  /// 合計点の、自己ベストとの比較（差分は全種目を入力し終えたときだけ出す）
+  var personalBestTotalComparison: PersonalBestComparison? {
+    guard let personalBestTotal else { return nil }
+    let isComplete = combinedEventInfo.events.enteredCount == combinedEventInfo.events.count
+    return PersonalBestComparison(
+      point: personalBestTotal,
+      diff: isComplete ? combinedEventInfo.point - personalBestTotal : nil
+    )
+  }
+
+  /// 保存ダイアログで保存を確定したとき
+  func saveButtonDidTap(name: String) {
+    guard canSave else { return }
+    sheetStore.save(SavedScoreSheet(info: combinedEventInfo, name: name))
+    reloadPersonalBest()
+    saveFeedbackTrigger += 1
+  }
+
+  /// 保存した記録の一覧ボタンをタップしたとき
+  func savedSheetsButtonDidTap() {
+    sheet = .SavedSheets(combinedEventInfo.event)
   }
 
   /// シェアボタンをタップしたとき
@@ -167,9 +239,15 @@ final class ScoreCalculateViewModel: ObservableObject {
     }
   }
 
-  init(combinedEvent: CombinedEvent, targetStore: TargetScoreStoring = TargetScoreStore()) {
+  init(
+    combinedEvent: CombinedEvent,
+    targetStore: TargetScoreStoring = TargetScoreStore(),
+    sheetStore: ScoreSheetStoring = ScoreSheetStore()
+  ) {
     self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
     self.targetStore = targetStore
     self.targetPoint = targetStore.target(for: combinedEvent)
+    self.sheetStore = sheetStore
+    reloadPersonalBest()
   }
 }
