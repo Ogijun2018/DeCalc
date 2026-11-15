@@ -57,12 +57,15 @@ struct ScoreCalculateView: View {
         .navigationTitle(viewModel.combinedEventInfo.event.localizedName)
         .navigationBarTitleDisplayMode(.automatic)
         .toolbar {
+          // ヘルプ: 入力方法と計算式の説明をシートで表示（「…」とは別のボタンにする）
+          ToolbarItem(placement: .topBarTrailing) {
+            Button("Help", systemImage: "questionmark.circle") {
+              viewModel.helpButtonDidTap()
+            }
+          }
+          ToolbarSpacer(.fixed, placement: .topBarTrailing)
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
-              // ヘルプ: 入力方法と計算式の説明をシートで表示
-              Button("Help", systemImage: "questionmark.circle") {
-                viewModel.helpButtonDidTap()
-              }
               // 記録全削除: 既存のゴミ箱と同じ挙動（確認アラートを表示）
               Button("Delete all scores", systemImage: "trash", role: .destructive) {
                 isShowingClearAlert = true
