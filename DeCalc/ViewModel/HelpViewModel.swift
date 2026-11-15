@@ -39,8 +39,6 @@ final class HelpViewModel: ObservableObject {
     FormulaRow(title: String(localized: "Jumps"), formula: "P = A × (M − B)^C"),
     FormulaRow(title: String(localized: "Throws"), formula: "P = A × (D − B)^C"),
   ]
-  /// サポートページ
-  let supportURL = URL(string: "https://ogijun2018.github.io/DeCalc/")
 
   init(combinedEvent: CombinedEvent) {
     self.combinedEvent = combinedEvent
