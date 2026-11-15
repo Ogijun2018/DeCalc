@@ -63,14 +63,6 @@ struct HelpView: View {
         .font(.callout.monospacedDigit())
         .frame(maxWidth: .infinity, alignment: .leading)
       }
-
-      if let supportURL = viewModel.supportURL {
-        Section {
-          Link(destination: supportURL) {
-            Label("Support page", systemImage: "safari")
-          }
-        }
-      }
     }
     .sheetNavigation(title: "Help")
   }
