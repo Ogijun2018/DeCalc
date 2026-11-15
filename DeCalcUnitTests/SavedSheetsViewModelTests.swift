@@ -9,7 +9,7 @@ import Testing
 
 struct SavedSheetsViewModelTests {
 
-    @Test func 行のタイトルと自己ベストの印はViewModelが決める() throws {
+    @Test func 行のタイトルと自己ベスト_目標の印はViewModelが決める() throws {
         let suiteName = "SavedSheetsViewModelTests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -20,12 +20,15 @@ struct SavedSheetsViewModelTests {
         store.save(SavedScoreSheet(
             info: .init(event: .decathlon, events: events),
             name: "Spring",
+            isPersonalBest: true,
+            isTarget: true,
             date: Date(timeIntervalSince1970: 1_000)
         ))
         events[1].point = 700
         store.save(SavedScoreSheet(
             info: .init(event: .decathlon, events: events),
             name: "",
+            isPersonalBest: true,
             date: Date(timeIntervalSince1970: 2_000)
         ))
 
@@ -36,6 +39,7 @@ struct SavedSheetsViewModelTests {
         #expect(viewModel.rows[1].title == "Spring")
         #expect(viewModel.rows[1].subtitle != nil)
         #expect(viewModel.rows.map(\.isPersonalBest) == [true, false])
+        #expect(viewModel.rows.map(\.isTarget) == [false, true])
         #expect(viewModel.rows[0].details.count == 10)
 
         viewModel.delete(at: IndexSet(integer: 0))

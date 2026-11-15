@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// 保存した記録の一覧画面。最も合計点が高い記録を自己ベストとして表示する
+/// 保存した記録の一覧画面。自己ベストの記録と、現在の目標の記録に印を付ける
 struct SavedSheetsView: View {
   @StateObject var viewModel: SavedSheetsViewModel
 
@@ -35,7 +35,7 @@ struct SavedSheetsView: View {
     .sheetNavigation(title: "Saved scores")
   }
 
-  /// 一覧の1行（タイトル・日時・自己ベストの印・合計点）
+  /// 一覧の1行（タイトル・日時・目標と自己ベストの印・合計点）
   private func rowLabel(_ row: SavedSheetsViewModel.Row) -> some View {
     HStack(spacing: 8) {
       VStack(alignment: .leading, spacing: 2) {
@@ -48,6 +48,11 @@ struct SavedSheetsView: View {
         }
       }
       Spacer()
+      if row.isTarget {
+        Image(systemName: "target")
+          .foregroundStyle(Color.primaryColor)
+          .accessibilityLabel("Target")
+      }
       if row.isPersonalBest {
         Image(systemName: "crown.fill")
           .foregroundStyle(.yellow)

@@ -12,36 +12,33 @@ final class ScoreCalculateViewModel: ObservableObject {
   /// シートとして表示する画面（nilの場合は非表示）
   @Published var sheet: Router?
 
-  /// 目標合計点（未設定の場合はnil）
+  /// 目標の合計点（「目標点として保存」した記録の合計。なければnil）
   @Published private(set) var targetPoint: Int?
-  private let targetStore: TargetScoreStoring
+  /// 種目ごとの目標得点（目標の記録にその種目の得点がない場合は0）
+  @Published private(set) var targetEventPoints: [Int] = []
 
   /// 目標までの残り得点（目標が未設定の場合はnil、達成済みの場合は0）
   var remainingToTarget: Int? {
     targetPoint.map { max(0, $0 - combinedEventInfo.point) }
   }
 
-  /// 目標点の行をタップしたとき
-  func plannerButtonDidTap() {
-    sheet = .Planner(combinedEventInfo)
-  }
-
-  /// シートが閉じられたとき、シート側で変更された内容を読み直す
+  /// シートが閉じられたとき、シート側で保存・削除された記録を読み直す
   func sheetDidDismiss() {
-    targetPoint = targetStore.target(for: combinedEventInfo.event)
-    reloadPersonalBest()
+    reloadSavedSheets()
   }
 
-  /// 保存した記録から自己ベストを読み直す
-  private func reloadPersonalBest() {
+  /// 保存した記録から自己ベストと目標を読み直す
+  private func reloadSavedSheets() {
     let sheets = sheetStore.sheets(for: combinedEventInfo.event)
     personalBestTotal = sheets.personalBest?.total
     personalBestEventPoints = sheets.bestEventPoints(eventCount: combinedEventInfo.events.count)
+    targetPoint = sheets.target?.total
+    targetEventPoints = sheets.target?.entries.map(\.point) ?? []
   }
 
-  /// 自己ベストとの比較結果
-  struct PersonalBestComparison {
-    /// 自己ベストの得点
+  /// 自己ベストや目標との比較結果
+  struct ScoreComparison {
+    /// 比べる相手（自己ベスト・目標）の得点
     let point: Int
     /// 現在の得点との差（現在の得点が未入力の場合はnil）
     let diff: Int?
@@ -59,8 +56,6 @@ final class ScoreCalculateViewModel: ObservableObject {
   @Published private(set) var personalBestTotal: Int?
   /// 種目ごとの自己ベスト得点（保存した記録の中でその種目の最高点、未入力は0）
   @Published private(set) var personalBestEventPoints: [Int] = []
-  /// 記録を保存するたびに増えるカウンタ（触覚フィードバックのトリガー）
-  @Published private(set) var saveFeedbackTrigger = 0
   private let sheetStore: ScoreSheetStoring
 
   /// 保存できる得点があるか
@@ -69,33 +64,39 @@ final class ScoreCalculateViewModel: ObservableObject {
   }
 
   /// 指定した種目の、その種目の自己ベストとの比較（保存した記録にその種目の得点がない場合はnil）
-  func personalBestComparison(at index: Int) -> PersonalBestComparison? {
-    guard personalBestEventPoints.indices.contains(index),
-          personalBestEventPoints[index] > 0 else { return nil }
-    let bestPoint = personalBestEventPoints[index]
+  func personalBestComparison(at index: Int) -> ScoreComparison? {
+    comparison(with: personalBestEventPoints, at: index)
+  }
+
+  /// 指定した種目の、その種目の目標との比較（目標にその種目の得点がない場合はnil）
+  func targetComparison(at index: Int) -> ScoreComparison? {
+    comparison(with: targetEventPoints, at: index)
+  }
+
+  /// 種目ごとの得点の一覧（自己ベスト・目標）と、指定した種目の現在の得点を比べる
+  private func comparison(with points: [Int], at index: Int) -> ScoreComparison? {
+    guard points.indices.contains(index), points[index] > 0 else { return nil }
     let currentPoint = combinedEventInfo.events[index].point
-    return PersonalBestComparison(
-      point: bestPoint,
-      diff: currentPoint > 0 ? currentPoint - bestPoint : nil
+    return ScoreComparison(
+      point: points[index],
+      diff: currentPoint > 0 ? currentPoint - points[index] : nil
     )
   }
 
   /// 合計点の、自己ベストとの比較（差分は全種目を入力し終えたときだけ出す）
-  var personalBestTotalComparison: PersonalBestComparison? {
+  var personalBestTotalComparison: ScoreComparison? {
     guard let personalBestTotal else { return nil }
     let isComplete = combinedEventInfo.events.enteredCount == combinedEventInfo.events.count
-    return PersonalBestComparison(
+    return ScoreComparison(
       point: personalBestTotal,
       diff: isComplete ? combinedEventInfo.point - personalBestTotal : nil
     )
   }
 
-  /// 保存ダイアログで保存を確定したとき
-  func saveButtonDidTap(name: String) {
+  /// 保存ボタンをタップしたとき（名前と、PB・目標にするかは保存画面で決める）
+  func saveButtonDidTap() {
     guard canSave else { return }
-    sheetStore.save(SavedScoreSheet(info: combinedEventInfo, name: name))
-    reloadPersonalBest()
-    saveFeedbackTrigger += 1
+    sheet = .Save(combinedEventInfo)
   }
 
   /// 保存した記録の一覧ボタンをタップしたとき
@@ -241,13 +242,10 @@ final class ScoreCalculateViewModel: ObservableObject {
 
   init(
     combinedEvent: CombinedEvent,
-    targetStore: TargetScoreStoring = TargetScoreStore(),
     sheetStore: ScoreSheetStoring = ScoreSheetStore()
   ) {
     self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
-    self.targetStore = targetStore
-    self.targetPoint = targetStore.target(for: combinedEvent)
     self.sheetStore = sheetStore
-    reloadPersonalBest()
+    reloadSavedSheets()
   }
 }
