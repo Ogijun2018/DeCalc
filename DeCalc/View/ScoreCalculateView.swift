@@ -19,8 +19,6 @@ struct ScoreCalculateView: View {
   @State private var isShowingClearAlert = false
   /// 外部URL（App Store等）を開くための環境値
   @Environment(\.openURL) private var openURL
-  /// TODO: App Store ConnectのアプリIDに置き換える
-  private static let appStoreID = "0000000000"
 
   var body: some View {
     NavigationStack {
@@ -110,26 +108,24 @@ struct ScoreCalculateView: View {
         .navigationTitle(viewModel.combinedEventInfo.event.localizedName)
         .navigationBarTitleDisplayMode(.automatic)
         .toolbar {
+          // ヘルプ: 入力方法と計算式の説明をシートで表示（「…」とは別のボタンにする）
+          ToolbarItem(placement: .topBarTrailing) {
+            Button("Help", systemImage: "questionmark.circle") {
+              viewModel.helpButtonDidTap()
+            }
+          }
+          ToolbarSpacer(.fixed, placement: .topBarTrailing)
           ToolbarItem(placement: .topBarTrailing) {
             Menu {
-              // ヘルプ: 一旦何もしない
-              Button {
-              } label: {
-                Label("Help", systemImage: "questionmark.circle")
-              }
               // 記録全削除: 既存のゴミ箱と同じ挙動（確認アラートを表示）
-              Button(role: .destructive) {
+              Button("Delete all scores", systemImage: "trash", role: .destructive) {
                 isShowingClearAlert = true
-              } label: {
-                Label("Delete all scores", systemImage: "trash")
               }
               // レビュー: App Storeのレビュー画面へ遷移
-              Button {
-                if let url = URL(string: "https://apps.apple.com/app/id\(Self.appStoreID)?action=write-review") {
+              Button("Review", systemImage: "star") {
+                if let url = viewModel.reviewURL {
                   openURL(url)
                 }
-              } label: {
-                Label("Review", systemImage: "star")
               }
             } label: {
               Image(systemName: "ellipsis")
@@ -149,6 +145,7 @@ struct ScoreCalculateView: View {
         }
       }
     }
+    .sheet(item: $viewModel.sheet) { RouterView(router: $0) }
     .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
       Button("Cancel", role: .cancel) {
         isShowingClearAlert = false

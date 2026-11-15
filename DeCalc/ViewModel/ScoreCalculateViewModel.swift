@@ -5,10 +5,25 @@
 //  Created by Jun Ogino on 2024/11/29.
 //
 
-import SwiftUI
+import Foundation
 
 final class ScoreCalculateViewModel: ObservableObject {
   @Published var combinedEventInfo: CombinedEventInfo
+  /// シートとして表示する画面（nilの場合は非表示）
+  @Published var sheet: Router?
+
+  /// ヘルプボタンをタップしたとき
+  func helpButtonDidTap() {
+    sheet = .Help(combinedEventInfo.event)
+  }
+
+  /// App StoreのアプリID
+  private static let appStoreID = "6779939129"
+
+  /// App Storeのレビュー投稿画面のURL
+  var reviewURL: URL? {
+    URL(string: "https://apps.apple.com/app/id\(Self.appStoreID)?action=write-review")
+  }
 
   /// 記録のTextViewをタップしたときに
   func onPressRecordTextView(id: Int) {
