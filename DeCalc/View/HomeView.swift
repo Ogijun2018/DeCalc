@@ -33,7 +33,7 @@ struct HomeView: View {
   }()
 
   var body: some View {
-    NavigationStack {
+    NavigationStack(path: $viewModel.path) {
       VStack {
         Picker("Gender", selection: $viewModel.selectedGender) {
           Text("Men").tag(Gender.Men)
@@ -47,9 +47,7 @@ struct HomeView: View {
         ScrollView {
           VStack(spacing: 0) {
             ForEach(buttons) { button in
-              NavigationLink(
-                destination: RouterView(router: .Score(button.event))
-              ) {
+              NavigationLink(value: Router.Score(button.event)) {
                 viewModel.selectedGender == button.gender ? EventButton(
                   title: button.event.localizedName,
                   subTitle: button.event.description,
@@ -60,6 +58,7 @@ struct HomeView: View {
           }.padding()
         }
       }
+      .navigationDestination(for: Router.self) { RouterView(router: $0) }
     }
   }
 }
