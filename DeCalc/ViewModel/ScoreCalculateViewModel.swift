@@ -12,6 +12,25 @@ final class ScoreCalculateViewModel: ObservableObject {
   /// シートとして表示する画面（nilの場合は非表示）
   @Published var sheet: Router?
 
+  /// 目標合計点（未設定の場合はnil）
+  @Published private(set) var targetPoint: Int?
+  private let targetStore: TargetScoreStoring
+
+  /// 目標までの残り得点（目標が未設定の場合はnil、達成済みの場合は0）
+  var remainingToTarget: Int? {
+    targetPoint.map { max(0, $0 - combinedEventInfo.point) }
+  }
+
+  /// 目標点の行をタップしたとき
+  func plannerButtonDidTap() {
+    sheet = .Planner(combinedEventInfo)
+  }
+
+  /// シートが閉じられたとき、シート側で変更された内容を読み直す
+  func sheetDidDismiss() {
+    targetPoint = targetStore.target(for: combinedEventInfo.event)
+  }
+
   /// ヘルプボタンをタップしたとき
   func helpButtonDidTap() {
     sheet = .Help(combinedEventInfo.event)
@@ -138,7 +157,9 @@ final class ScoreCalculateViewModel: ObservableObject {
     }
   }
 
-  init(combinedEvent: CombinedEvent) {
+  init(combinedEvent: CombinedEvent, targetStore: TargetScoreStoring = TargetScoreStore()) {
     self.combinedEventInfo = .init(event: combinedEvent, events: combinedEvent.events)
+    self.targetStore = targetStore
+    self.targetPoint = targetStore.target(for: combinedEvent)
   }
 }

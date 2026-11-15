@@ -50,8 +50,11 @@ struct ScoreCalculateView: View {
             }
             // 入力中は合計点だけを表示して、入力欄が見える範囲を広く取る
             if !isEditing {
-              progressRow
-                .transition(.opacity.combined(with: .move(edge: .top)))
+              Group {
+                progressRow
+                targetRow
+              }
+              .transition(.opacity.combined(with: .move(edge: .top)))
             }
           }
           .animation(.snappy, value: isEditing)
@@ -100,7 +103,7 @@ struct ScoreCalculateView: View {
         }
       }
     }
-    .sheet(item: $viewModel.sheet) { RouterView(router: $0) }
+    .sheet(item: $viewModel.sheet, onDismiss: { viewModel.sheetDidDismiss() }) { RouterView(router: $0) }
     .alert("Delete all scores?", isPresented: $isShowingClearAlert) {
       Button("Cancel", role: .cancel) {
         isShowingClearAlert = false
@@ -130,6 +133,37 @@ struct ScoreCalculateView: View {
     }
     .accessibilityElement(children: .ignore)
     .accessibilityLabel("\(entered) of \(total) events entered")
+  }
+
+  /// 目標点の行。タップで目標点プランナーを開く
+  private var targetRow: some View {
+    Button {
+      viewModel.plannerButtonDidTap()
+    } label: {
+      HStack(spacing: 8) {
+        if let target = viewModel.targetPoint, let remaining = viewModel.remainingToTarget {
+          // 合計点の表示とそろえて桁区切りを入れないよう、文字列にしてから渡す
+          Label("Target \(String(target))", systemImage: "target")
+          Spacer()
+          if remaining > 0 {
+            Text("\(String(remaining)) to go")
+              .contentTransition(.numericText(value: Double(remaining)))
+              .animation(.snappy, value: remaining)
+          } else {
+            Label("Target reached!", systemImage: "checkmark.seal.fill")
+          }
+        } else {
+          Label("Set target", systemImage: "target")
+          Spacer()
+        }
+        Image(systemName: "chevron.right")
+          .font(.caption.weight(.bold))
+      }
+      .font(.subheadline.weight(.semibold))
+      .monospacedDigit()
+      .padding(.top, 4)
+      .contentShape(Rectangle())
+    }
   }
 
   /// 競技日の見出し（何日目・入力済み種目数・小計）
