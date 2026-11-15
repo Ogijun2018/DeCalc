@@ -16,8 +16,10 @@ final class SavedSheetsViewModel: ObservableObject {
     let subtitle: String?
     /// 合計点
     let total: Int
-    /// 自己ベスト（合計点が最も高い記録）かどうか
+    /// 自己ベスト（「PBとして保存」した記録のうち合計点が最も高いもの）かどうか
     let isPersonalBest: Bool
+    /// 現在の目標（「目標点として保存」した記録のうち最も新しいもの）かどうか
+    let isTarget: Bool
     /// 種目ごとの記録と得点
     let details: [DetailRow]
   }
@@ -57,6 +59,7 @@ final class SavedSheetsViewModel: ObservableObject {
   private func reload() {
     let sheets = store.sheets(for: combinedEvent)
     let personalBestID = sheets.personalBest?.id
+    let targetID = sheets.target?.id
     rows = sheets.map { sheet in
       let dateText = sheet.date.formatted(date: .abbreviated, time: .shortened)
       return Row(
@@ -65,6 +68,7 @@ final class SavedSheetsViewModel: ObservableObject {
         subtitle: sheet.name.isEmpty ? nil : dateText,
         total: sheet.total,
         isPersonalBest: sheet.id == personalBestID,
+        isTarget: sheet.id == targetID,
         details: detailRows(for: sheet)
       )
     }

@@ -13,12 +13,12 @@ enum Router: Hashable, Identifiable {
     case Score(CombinedEvent)
     /// ヘルプ画面
     case Help(CombinedEvent)
-    /// 目標点プランナー画面
-    case Planner(CombinedEventInfo)
     /// 結果のシェア画面
     case Share(CombinedEventInfo)
     /// 得点内訳グラフ画面
     case Chart(CombinedEventInfo)
+    /// 記録の保存画面
+    case Save(CombinedEventInfo)
     /// 保存した記録の一覧画面
     case SavedSheets(CombinedEvent)
 
@@ -37,9 +37,9 @@ struct RouterView: View {
         switch router {
         case .Score(let event): ScoreCalculateView(viewModel: .init(combinedEvent: event))
         case .Help(let event): HelpView(viewModel: .init(combinedEvent: event))
-        case .Planner(let info): PlannerView(viewModel: .init(combinedEventInfo: info))
         case .Share(let info): ShareResultView(viewModel: .init(combinedEventInfo: info))
         case .Chart(let info): ScoreChartView(viewModel: .init(combinedEventInfo: info))
+        case .Save(let info): SaveScoresView(viewModel: .init(combinedEventInfo: info))
         case .SavedSheets(let event): SavedSheetsView(viewModel: .init(combinedEvent: event))
         }
     }

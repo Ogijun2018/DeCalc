@@ -17,10 +17,6 @@ struct ScoreCalculateView: View {
   @FocusState var isPointFocused: Focus?
   /// 削除ダイアログの表示状態
   @State private var isShowingClearAlert = false
-  /// 保存ダイアログの表示状態
-  @State private var isShowingSaveAlert = false
-  /// 保存ダイアログで入力する名前
-  @State private var saveName = ""
   /// 外部URL（App Store等）を開くための環境値
   @Environment(\.openURL) private var openURL
 
@@ -94,7 +90,7 @@ struct ScoreCalculateView: View {
             Menu {
               // 保存: 現在の記録を端末内に保存し、自己ベストとの比較に使う
               Button("Save scores", systemImage: "square.and.arrow.down") {
-                isShowingSaveAlert = true
+                viewModel.saveButtonDidTap()
               }
               .disabled(!viewModel.canSave)
               Button("Saved scores", systemImage: "tray.full") {
@@ -124,18 +120,6 @@ struct ScoreCalculateView: View {
             }
           }
         }
-        .alert("Save scores", isPresented: $isShowingSaveAlert) {
-          TextField("Name (optional)", text: $saveName)
-          Button("Cancel", role: .cancel) {
-            saveName = ""
-          }
-          Button("Save") {
-            viewModel.saveButtonDidTap(name: saveName)
-            saveName = ""
-          }
-        } message: {
-          Text("The scores are saved on this device only.")
-        }
         // 得点欄（実体のあるTextField）はフォーカスの変化を検知してスクロールする
         .onChange(of: isPointFocused) { _, newValue in
           scrollToFocusedEvent(newValue, proxy: proxy)
@@ -156,15 +140,22 @@ struct ScoreCalculateView: View {
     // 得点が確定したとき・逆算に失敗したときに触覚で知らせる
     .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.scoreFeedbackTrigger)
     .sensoryFeedback(.error, trigger: viewModel.errorFeedbackTrigger)
-    .sensoryFeedback(.success, trigger: viewModel.saveFeedbackTrigger)
     .tint(Color.primaryColor)
   }
 
-  /// 自己ベストの得点と、現在の得点との差（上回っていれば緑、下回っていれば赤）
+  /// 自己ベストとの比較
   /// 合計欄では合計点の自己ベスト、種目カードではその種目の自己ベストと比べる
-  private func personalBestLabel(_ comparison: ScoreCalculateViewModel.PersonalBestComparison) -> some View {
+  private func personalBestLabel(_ comparison: ScoreCalculateViewModel.ScoreComparison) -> some View {
+    comparisonLabel(Text(verbatim: "PB \(comparison.point)"), comparison)
+  }
+
+  /// 比べる相手（自己ベスト・目標）の得点と、現在の得点との差（上回っていれば緑、下回っていれば赤）
+  private func comparisonLabel(
+    _ title: Text,
+    _ comparison: ScoreCalculateViewModel.ScoreComparison
+  ) -> some View {
     HStack(spacing: 6) {
-      Text(verbatim: "PB \(comparison.point)")
+      title
         .foregroundStyle(.secondary)
       if let diff = comparison.diff, let diffText = comparison.diffText {
         Text(verbatim: diffText)
@@ -191,34 +182,25 @@ struct ScoreCalculateView: View {
     .accessibilityLabel("\(entered) of \(total) events entered")
   }
 
-  /// 目標点の行。タップで目標点プランナーを開く
+  /// 目標の合計点と、そこまでの残り得点（目標は「目標点として保存」した記録で決まる）
+  @ViewBuilder
   private var targetRow: some View {
-    Button {
-      viewModel.plannerButtonDidTap()
-    } label: {
+    if let target = viewModel.targetPoint, let remaining = viewModel.remainingToTarget {
       HStack(spacing: 8) {
-        if let target = viewModel.targetPoint, let remaining = viewModel.remainingToTarget {
-          // 合計点の表示とそろえて桁区切りを入れないよう、文字列にしてから渡す
-          Label("Target \(String(target))", systemImage: "target")
-          Spacer()
-          if remaining > 0 {
-            Text("\(String(remaining)) to go")
-              .contentTransition(.numericText(value: Double(remaining)))
-              .animation(.snappy, value: remaining)
-          } else {
-            Label("Target reached!", systemImage: "checkmark.seal.fill")
-          }
+        // 合計点の表示とそろえて桁区切りを入れないよう、文字列にしてから渡す
+        Label("Target \(String(target))", systemImage: "target")
+        Spacer()
+        if remaining > 0 {
+          Text("\(String(remaining)) to go")
+            .contentTransition(.numericText(value: Double(remaining)))
+            .animation(.snappy, value: remaining)
         } else {
-          Label("Set target", systemImage: "target")
-          Spacer()
+          Label("Target reached!", systemImage: "checkmark.seal.fill")
         }
-        Image(systemName: "chevron.right")
-          .font(.caption.weight(.bold))
       }
       .font(.subheadline.weight(.semibold))
       .monospacedDigit()
       .padding(.top, 4)
-      .contentShape(Rectangle())
     }
   }
 
@@ -307,9 +289,17 @@ struct ScoreCalculateView: View {
             .regular.tint(Color.primaryColor.opacity(0.2)).interactive()
           )
         }
-        if let comparison = viewModel.personalBestComparison(at: index) {
-          HStack {
-            personalBestLabel(comparison)
+        // 自己ベスト・目標との差（保存した記録にその種目の得点があるものだけ）
+        let personalBest = viewModel.personalBestComparison(at: index)
+        let target = viewModel.targetComparison(at: index)
+        if personalBest != nil || target != nil {
+          HStack(spacing: 12) {
+            if let personalBest {
+              personalBestLabel(personalBest)
+            }
+            if let target {
+              comparisonLabel(Text("Target \(String(target.point))"), target)
+            }
             Spacer()
           }
           .padding(.top, 2)
