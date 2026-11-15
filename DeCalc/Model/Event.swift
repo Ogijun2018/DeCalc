@@ -22,6 +22,31 @@ enum Event: CustomStringConvertible, Hashable {
     }
   }
 
+  /// 種目の種類（走・跳・投）
+  enum Kind: CaseIterable {
+    case run
+    case jump
+    case throwing
+
+    /// ローカライズされた種類名
+    var localizedName: String {
+      switch self {
+      case .run: String(localized: "Track events")
+      case .jump: String(localized: "Jumps")
+      case .throwing: String(localized: "Throws")
+      }
+    }
+  }
+
+  /// この種目の種類
+  var kind: Kind {
+    switch self {
+    case .Run: .run
+    case .Jump: .jump
+    case .Throw: .throwing
+    }
+  }
+
   enum RunEvent: String {
     case hundredTenMHurdles = "110mH"
     case fourHundredM = "400m"
